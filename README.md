@@ -16,56 +16,60 @@ Coeficiente de asimetría.
 Identificación del tipo de asimetría.
 
 Los resultados se muestran mediante una interfaz gráfica sencilla, organizada por grupos de medidas para facilitar su lectura.
-/////////////////////////////////////////////////////////////////////
-Tipos de archivos .csv admitidos
+Formato de los archivos CSV
 
-Antes de seleccionar el archivo, el programa solicita indicar qué tipo de problema se desea resolver.
+El programa acepta cinco formas diferentes de organizar los datos.
+Antes de cargar el archivo .csv, se debe seleccionar la opción correspondiente al formato utilizado.
 
-Existen cinco opciones:
+Importante: en los tipos 1, 2 y 4, la coma , puede utilizarse como separador decimal. Por este motivo, la separación entre datos se realiza mediante saltos de línea. También se permite utilizar ; para colocar varios datos en una misma línea.
 
-1 - Datos tomados
-2 - Categorías
-3 - Mini tabla de categorías
-4 - Datos para armar intervalos
-5 - Límites de intervalo y frecuencia
+Tipo 1 — Datos tomados
 
-La estructura esperada del .csv depende de la opción seleccionada.
+Se utiliza cuando se tienen los datos cuantitativos directamente.
 
-2.1. Tipo 1 — Datos tomados
+Ejemplo con punto decimal
+1.68
+1.76
+1.76
+2.00
+2.16
+2.50
+2.75
+3.10
+3.25
+Ejemplo con coma decimal
+1,68
+1,76
+1,76
+2,00
+2,16
+2,50
+2,75
+3,10
+3,25
+También se pueden colocar varios datos utilizando ;
+1,68;1,76;1,76
+2,00;2,16;2,50
+2,75;3,10;3,25
 
-Esta opción se utiliza cuando se dispone directamente de una serie de observaciones cuantitativas.
-
-Por ejemplo:
-
-15.2
-16.7
-18.3
-17.5
-20.1
-16.7
-19.4
-
-También se puede utilizar coma decimal:
-
-15,2
-16,7
-18,3
-17,5
-20,1
-16,7
-19,4
-
-Cada fila representa un dato individual.
-
-A partir de estos datos se pueden calcular directamente las principales medidas descriptivas.
-
-///////////////////////////////////////////////////////////
-2.2. Tipo 2 — Categorías
-
-Esta opción se utiliza cuando los datos corresponden a categorías cualitativas.
+El programa interpreta cada valor como un dato independiente.
 
 Por ejemplo:
 
+1,68;1,76;1,76
+
+se interpreta como:
+
+1.68
+1.76
+1.76
+Tipo 2 — Categorías
+
+Se utiliza cuando los datos vienen representados como categorías que pueden repetirse.
+
+Las categorías pueden ser texto o números.
+
+Ejemplo con categorías de texto
 Bueno
 Malo
 Bueno
@@ -74,88 +78,141 @@ Bueno
 Malo
 Regular
 
-En este caso el programa conserva los datos y determina cuántas veces aparece cada categoría.
-
-Por ejemplo:
+El programa obtiene las frecuencias:
 
 Bueno:    3
 Malo:     2
 Regular:  2
+Ejemplo con categorías numéricas
+2,2
+2,2
+2,5
+2,7
+2,7
+2,7
+2,8
+2,9
+2,9
+2,9
+2,9
+3
+3,1
+3,1
+3,1
+3,2
+3,3
+3,4
+3,7
+3,7
 
-Al tratarse de categorías cualitativas, no se calculan medidas como media, mediana, varianza o desvío estándar sobre los nombres de las categorías.
-//////////////////////////////////////////////////////////
-2.3. Tipo 3 — Mini tabla de categorías
-
-Esta opción se utiliza cuando el archivo ya proporciona directamente la categoría y la cantidad de veces que aparece.
+En este caso, aunque se haya seleccionado Categorías, los valores son numéricos. Por lo tanto, el programa puede utilizarlos para realizar los cálculos estadísticos.
 
 Por ejemplo:
 
-Bueno,7
-Malo,3
-Regular,5
+2,2 → 2.2
+2,5 → 2.5
+2,7 → 2.7
+3   → 3.0
+3,1 → 3.1
 
-La primera columna corresponde a la categoría y la segunda a su frecuencia.
+También se permite utilizar ; para separar varios datos:
 
-En este caso el programa no necesita contar nuevamente las categorías, ya que las frecuencias vienen dadas directamente.
+2,2;2,5;2,7
+2,7;2,8;2,9
+3;3,1;3,2
+Tipo 3 — Mini tabla de categorías
 
-La información cargada se interpreta como:
+En este caso el archivo ya contiene la categoría y la frecuencia.
+
+El separador utilizado es ;.
+
+El formato es:
+
+"categoria";"frecuencia"
+
+La categoría puede ser texto o un número.
+
+Ejemplo con categorías de texto
+"Bueno";"7"
+"Malo";"3"
+"Regular";"5"
+
+El programa interpreta:
 
 Bueno     → 7
 Malo      → 3
 Regular   → 5
-//////////////////////////////////////////////////////////////////////
-2.4. Tipo 4 — Datos para armar intervalos
+Ejemplo con categorías numéricas
+"2,2";"3"
+"2,5";"1"
+"2,7";"4"
+"2,9";"6"
+"3,1";"3"
 
-Esta opción se utiliza cuando se dispone de datos cuantitativos individuales, pero el ejercicio requiere agruparlos posteriormente en intervalos.
+Aquí:
 
-El .csv tiene el mismo principio que el Tipo 1:
-
-15.2
-16.7
-18.3
-17.5
-20.1
-16.7
-19.4
-
-La diferencia está en el tratamiento posterior.
-
-El programa toma los datos individuales y calcula, entre otros elementos:
-
-Cantidad de datos.
-Mínimo.
-Máximo.
-Rango.
-Cantidad de intervalos mediante la regla de Sturges.
-Amplitud de los intervalos.
-Frecuencia de cada intervalo.
-Marca de clase.
-
-Posteriormente utiliza los intervalos para realizar los cálculos correspondientes a datos agrupados.
-
-Los resultados obtenidos a partir de los intervalos son aproximados, debido a que se utiliza la marca de clase como representación de los datos pertenecientes a cada intervalo.
-///////////////////////////////////////////////////////////////////////////////////
-2.5. Tipo 5 — Límites de intervalo y frecuencia
-
-Esta opción se utiliza cuando el ejercicio ya proporciona los intervalos y sus frecuencias.
-
-El .csv debe contener tres columnas:
-
-Límite inferior,Límite superior,Frecuencia
+Primera columna → categoría.
+Segunda columna → cantidad de veces que se repite.
 
 Por ejemplo:
 
-15,17,4
-17,19,6
-19,21,16
-21,23,3
-23,25,1
+"2,9";"6"
 
-El programa interpreta cada fila como:
+significa que la categoría 2,9 aparece 6 veces.
 
-Límite inferior | Límite superior | Frecuencia
-       15       |       17        |     4
-       17       |       19        |     6
-       19       |       21        |     16
-       21       |       23        |     3
-       23       |       25        |     1
+Tipo 4 — Datos para armar intervalos
+
+Se utiliza cuando se proporcionan los datos individuales, pero el ejercicio requiere posteriormente agruparlos en intervalos.
+
+El formato de entrada es igual al Tipo 1.
+
+Ejemplo con punto decimal
+1.68
+1.76
+1.76
+2.00
+2.16
+2.50
+2.75
+3.10
+3.25
+3.50
+3.75
+4.00
+Ejemplo con coma decimal
+1,68
+1,76
+1,76
+2,00
+2,16
+2,50
+2,75
+3,10
+3,25
+3,50
+3,75
+4,00
+
+También se acepta:
+
+1,68;1,76;1,76
+2,00;2,16;2,50
+2,75;3,10;3,25
+3,50;3,75;4,00
+
+A diferencia del Tipo 1, el programa posteriormente utilizará estos datos para construir los intervalos y calcular las medidas correspondientes a datos agrupados.
+
+Tipo 5 — Límites del intervalo y frecuencia
+
+En este caso los intervalos ya están definidos, por lo que el archivo debe proporcionar:
+
+Límite inferior ; Límite superior ; Frecuencia
+
+El separador es ;.
+
+Ejemplo
+"15";"17";"4"
+"17";"19";"6"
+"19";"21";"16"
+"21";"23";"3"
+"23";"25";"1"

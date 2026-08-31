@@ -2,91 +2,85 @@ import csv
 
 
 # ============================================================
-# LECTURA GENERAL DEL CSV
+# LECTURA GENERAL DEL ARCHIVO
 # ============================================================
 
-def leer_csv(ruta):
+def leer_archivo_texto(
+    ruta
+):
 
     """
-    Lee un archivo CSV.
+    Lee el archivo linea por linea.
 
-    Permite separador:
-        ,
-        ;
+    NO utiliza la coma como separador.
 
-    Devuelve una lista de filas.
+    Esto permite que:
+
+        2,2
+
+    sea interpretado como un unico dato.
     """
 
     with open(
         ruta,
         "r",
-        encoding="utf-8-sig",
-        newline=""
+        encoding="utf-8-sig"
     ) as archivo:
 
-        muestra = archivo.read(
-            4096
-        )
+        lineas = archivo.readlines()
 
-        archivo.seek(0)
-
-        try:
-
-            dialecto = csv.Sniffer().sniff(
-                muestra,
-                delimiters=",;"
-            )
-
-        except csv.Error:
-
-            dialecto = csv.excel
-
-        lector = csv.reader(
-            archivo,
-            dialecto
-        )
-
-        filas = []
-
-        for fila in lector:
-
-            fila = [
-                elemento.strip()
-                for elemento in fila
-            ]
-
-            if any(
-                elemento != ""
-                for elemento in fila
-            ):
-
-                filas.append(fila)
-
-    return filas
+    return lineas
 
 
 # ============================================================
-# CONVERSION DE NUMEROS
+# CONVERTIR TEXTO A NUMERO
 # ============================================================
 
-def convertir_numero(valor):
+def convertir_numero(
+    valor
+):
 
     """
-    Convierte un texto en numero.
+    Convierte:
 
-    Permite:
+        2,2  -> 2.2
+        2.2  -> 2.2
+        3    -> 3.0
 
-        15.5
-        15,5
+    Tambien elimina espacios y comillas.
     """
 
     valor = str(
         valor
     ).strip()
 
+    valor = valor.strip(
+        '"'
+    )
+
+    valor = valor.strip(
+        "'"
+    )
+
+    valor = valor.strip()
+
+    if not valor:
+
+        raise ValueError(
+            "Se encontro un valor numerico vacio."
+        )
+
+    # --------------------------------------------------------
+    # Si utiliza coma decimal:
+    #
+    # 2,2 -> 2.2
+    # --------------------------------------------------------
+
     if (
-        "," in valor
-        and "." not in valor
+        ","
+        in valor
+        and "."
+        not in valor
     ):
 
         valor = valor.replace(
@@ -94,120 +88,157 @@ def convertir_numero(valor):
             "."
         )
 
-    return float(valor)
+    # --------------------------------------------------------
+    # Si por alguna razon aparece:
+    #
+    # 1.234,56
+    #
+    # se interpreta como 1234.56
+    # --------------------------------------------------------
 
+    elif (
+        ","
+        in valor
+        and "."
+        in valor
+    ):
 
-# ============================================================
-# DETECCION DE ENCABEZADO
-# ============================================================
+        valor = valor.replace(
+            ".",
+            ""
+        )
 
-def quitar_encabezado(
-    filas,
-    tipo
-):
-
-    """
-    Intenta determinar si la primera fila es
-    un encabezado.
-
-    Ejemplos:
-
-        tiempo
-
-        categoria,frecuencia
-
-        limite_inferior,limite_superior,frecuencia
-    """
-
-    if not filas:
-
-        return filas
-
-    primera_fila = filas[0]
+        valor = valor.replace(
+            ",",
+            "."
+        )
 
     try:
 
-        # ----------------------------------------------------
-        # Tipo 1 y 4
-        # ----------------------------------------------------
+        return float(
+            valor
+        )
 
-        if tipo == 1 or tipo == 4:
+    except ValueError:
 
-            convertir_numero(
-                primera_fila[0]
-            )
-
-        # ----------------------------------------------------
-        # Tipo 3
-        # ----------------------------------------------------
-
-        elif tipo == 3:
-
-            convertir_numero(
-                primera_fila[1]
-            )
-
-        # ----------------------------------------------------
-        # Tipo 5
-        # ----------------------------------------------------
-
-        elif tipo == 5:
-
-            convertir_numero(
-                primera_fila[0]
-            )
-
-            convertir_numero(
-                primera_fila[1]
-            )
-
-            convertir_numero(
-                primera_fila[2]
-            )
-
-        return filas
-
-    except (
-        ValueError,
-        IndexError
-    ):
-
-        return filas[1:]
+        raise ValueError(
+            f"'{valor}' no es un numero valido."
+        )
 
 
 # ============================================================
-# OPCION 1
+# LIMPIAR LINEA
+# ============================================================
+
+def limpiar_linea(
+    linea
+):
+
+    linea = linea.strip()
+
+    # Ignorar lineas vacias.
+    if not linea:
+
+        return None
+
+    # Ignorar comentarios.
+    if linea.startswith("#"):
+
+        return None
+
+    return linea
+
+
+# ============================================================
+# DETECTAR ENCABEZADO NUMERICO
+# ============================================================
+
+def es_encabezado_tipo_1_2_4(
+    linea
+):
+
+    """
+    Para tipos 1, 2 y 4.
+
+    Si la primera linea es:
+
+        Tiempo
+
+    no es numerica y se considera encabezado.
+
+    Si es:
+
+        2,2
+
+    es un dato y NO se elimina.
+    """
+
+    try:
+
+        # Si contiene ';', puede haber
+        # varios datos en una misma linea.
+
+        partes = linea.split(";")
+
+        for parte in partes:
+
+            convertir_numero(
+                parte
+            )
+
+        return False
+
+    except ValueError:
+
+        return True
+
+
+# ============================================================
+# TIPO 1
 # DATOS TOMADOS
 # ============================================================
 
 def cargar_datos_tomados(
-    filas
+    lineas
 ):
-
-    """
-    CSV esperado:
-
-        12
-        15
-        12
-        18
-        20
-    """
 
     datos = []
 
-    for fila in filas:
+    for linea in lineas:
 
-        if not fila:
+        linea = limpiar_linea(
+            linea
+        )
+
+        if linea is None:
             continue
 
-        dato = convertir_numero(
-            fila[0]
+        # ----------------------------------------------------
+        # Una linea puede contener:
+        #
+        # 2,2
+        #
+        # o:
+        #
+        # 2,2;2,5;2,7
+        # ----------------------------------------------------
+
+        partes = linea.split(
+            ";"
         )
 
-        datos.append(
-            dato
-        )
+        for parte in partes:
+
+            if not parte.strip():
+                continue
+
+            dato = convertir_numero(
+                parte
+            )
+
+            datos.append(
+                dato
+            )
 
     if not datos:
 
@@ -219,37 +250,50 @@ def cargar_datos_tomados(
 
 
 # ============================================================
-# OPCION 2
+# TIPO 2
 # CATEGORIAS
 # ============================================================
 
 def cargar_categorias(
-    filas
+    lineas
 ):
-
-    """
-    CSV esperado:
-
-        Bueno
-        Malo
-        Bueno
-        Rechazado
-    """
 
     categorias = []
 
-    for fila in filas:
+    for linea in lineas:
 
-        if not fila:
+        linea = limpiar_linea(
+            linea
+        )
+
+        if linea is None:
             continue
 
-        categoria = (
-            fila[0].strip()
+        # ----------------------------------------------------
+        # Cada salto de linea es un dato.
+        #
+        # ';' permite varios datos en una linea.
+        # ----------------------------------------------------
+
+        partes = linea.split(
+            ";"
         )
 
-        categorias.append(
-            categoria
-        )
+        for parte in partes:
+
+            categoria = (
+                parte
+                .strip()
+                .strip('"')
+                .strip("'")
+                .strip()
+            )
+
+            if categoria:
+
+                categorias.append(
+                    categoria
+                )
 
     if not categorias:
 
@@ -260,13 +304,13 @@ def cargar_categorias(
     return categorias
 
 
+# ============================================================
+# FRECUENCIAS DE CATEGORIAS
+# ============================================================
+
 def calcular_frecuencias_categorias(
     categorias
 ):
-
-    """
-    Cuenta las apariciones de cada categoria.
-    """
 
     frecuencias = {}
 
@@ -288,38 +332,103 @@ def calcular_frecuencias_categorias(
 
 
 # ============================================================
-# OPCION 3
+# CONVERTIR CATEGORIAS NUMERICAS
+# ============================================================
+
+def convertir_categorias_numericas(
+    categorias
+):
+
+    datos = []
+
+    for categoria in categorias:
+
+        try:
+
+            datos.append(
+                convertir_numero(
+                    categoria
+                )
+            )
+
+        except ValueError:
+
+            raise ValueError(
+                "Las categorias contienen "
+                "al menos un valor no numerico."
+            )
+
+    return datos
+
+
+# ============================================================
+# TIPO 3
 # MINI TABLA DE CATEGORIAS
 # ============================================================
 
 def cargar_mini_tabla(
-    filas
+    lineas
 ):
 
     """
-    CSV esperado:
+    Formato:
 
-        Bueno,7
-        Malo,3
-        Rechazado,2
+        "categoria";"frecuencia"
+
+    Ejemplo:
+
+        "2,2";"3"
+        "2,5";"1"
+        "2,7";"3"
     """
 
     frecuencias = {}
 
-    for fila in filas:
+    for linea in lineas:
 
-        if len(fila) < 2:
+        linea = limpiar_linea(
+            linea
+        )
+
+        if linea is None:
             continue
 
-        categoria = (
-            fila[0].strip()
+        # ----------------------------------------------------
+        # El separador del tipo 3 es ';'
+        # ----------------------------------------------------
+
+        partes = linea.split(
+            ";"
         )
+
+        partes = [
+            parte.strip()
+            .strip('"')
+            .strip("'")
+            for parte in partes
+        ]
+
+        if len(partes) < 2:
+
+            raise ValueError(
+                "El tipo 3 debe tener "
+                "categoria;frecuencia."
+            )
+
+        categoria = partes[0]
 
         frecuencia = int(
             convertir_numero(
-                fila[1]
+                partes[1]
             )
         )
+
+        if frecuencia < 0:
+
+            raise ValueError(
+                "Las frecuencias no pueden "
+                "ser negativas."
+            )
 
         frecuencias[
             categoria
@@ -328,72 +437,108 @@ def cargar_mini_tabla(
     if not frecuencias:
 
         raise ValueError(
-            "No se encontraron categorias y frecuencias."
+            "No se encontraron datos "
+            "en la mini tabla."
         )
 
     return frecuencias
 
 
 # ============================================================
-# OPCION 5
-# INTERVALOS YA PROPORCIONADOS
+# TIPO 5
+# INTERVALOS + FRECUENCIA
 # ============================================================
 
 def cargar_intervalos(
-    filas
+    lineas
 ):
 
     """
-    CSV esperado:
-
-        15,17,4
-        17,19,6
-        19,21,16
-        21,23,3
-        23,25,1
-
     Formato:
 
-        limite inferior
-        limite superior
-        frecuencia
+        "limite inferior";"limite superior";"frecuencia"
+
+    Ejemplo:
+
+        "15";"17";"4"
+        "17";"19";"6"
+        "19";"21";"16"
     """
 
     intervalos = []
 
-    for fila in filas:
+    for linea in lineas:
 
-        if len(fila) < 3:
+        linea = limpiar_linea(
+            linea
+        )
+
+        if linea is None:
             continue
 
+        partes = linea.split(
+            ";"
+        )
+
+        partes = [
+            parte.strip()
+            .strip('"')
+            .strip("'")
+            for parte in partes
+        ]
+
+        if len(partes) < 3:
+
+            raise ValueError(
+                "El tipo 5 debe tener "
+                "limite inferior;limite superior;frecuencia."
+            )
+
         li = convertir_numero(
-            fila[0]
+            partes[0]
         )
 
         ls = convertir_numero(
-            fila[1]
+            partes[1]
         )
 
         fi = int(
             convertir_numero(
-                fila[2]
+                partes[2]
             )
         )
 
-        # Marca de clase
+        if ls <= li:
+
+            raise ValueError(
+                "El limite superior debe ser "
+                "mayor que el limite inferior."
+            )
+
+        if fi < 0:
+
+            raise ValueError(
+                "Las frecuencias no pueden "
+                "ser negativas."
+            )
+
         xi = (
             li + ls
         ) / 2
 
         intervalos.append({
 
-            "li": li,
+            "li":
+                li,
 
-            "ls": ls,
+            "ls":
+                ls,
 
-            "fi": fi,
+            "fi":
+                fi,
 
-            "xi": xi
+            "xi":
+                xi
         })
 
     if not intervalos:
@@ -406,7 +551,7 @@ def cargar_intervalos(
 
 
 # ============================================================
-# PROCESAMIENTO GENERAL DEL CSV
+# PROCESAMIENTO GENERAL
 # ============================================================
 
 def procesar_csv(
@@ -414,34 +559,14 @@ def procesar_csv(
     ruta
 ):
 
-    """
-    Procesa el CSV dependiendo del tipo
-    seleccionado en el menu.
-
-    Importante:
-    Esta funcion NO realiza los calculos estadisticos.
-    Solamente prepara los datos.
-    """
-
-    filas = leer_csv(
+    lineas = leer_archivo_texto(
         ruta
     )
 
-    if not filas:
+    if not lineas:
 
         raise ValueError(
             "El archivo CSV esta vacio."
-        )
-
-    filas = quitar_encabezado(
-        filas,
-        tipo
-    )
-
-    if not filas:
-
-        raise ValueError(
-            "No hay datos despues del encabezado."
         )
 
     # ========================================================
@@ -450,8 +575,42 @@ def procesar_csv(
 
     if tipo == 1:
 
+        # ----------------------------------------------------
+        # Detectar encabezado.
+        # ----------------------------------------------------
+
+        primera_linea = None
+
+        for linea in lineas:
+
+            linea = limpiar_linea(
+                linea
+            )
+
+            if linea is not None:
+
+                primera_linea = linea
+
+                break
+
+        if primera_linea is not None:
+
+            if es_encabezado_tipo_1_2_4(
+                primera_linea
+            ):
+
+                lineas = lineas[
+                    lineas.index(
+                        next(
+                            x for x in lineas
+                            if limpiar_linea(x)
+                            is not None
+                        )
+                    ) + 1:
+                    ]
+
         return cargar_datos_tomados(
-            filas
+            lineas
         )
 
     # ========================================================
@@ -460,8 +619,38 @@ def procesar_csv(
 
     elif tipo == 2:
 
+        primera_linea = None
+
+        for linea in lineas:
+
+            linea = limpiar_linea(
+                linea
+            )
+
+            if linea is not None:
+
+                primera_linea = linea
+
+                break
+
+        if primera_linea is not None:
+
+            if es_encabezado_tipo_1_2_4(
+                primera_linea
+            ):
+
+                lineas = lineas[
+                    lineas.index(
+                        next(
+                            x for x in lineas
+                            if limpiar_linea(x)
+                            is not None
+                        )
+                    ) + 1:
+                    ]
+
         return cargar_categorias(
-            filas
+            lineas
         )
 
     # ========================================================
@@ -471,7 +660,7 @@ def procesar_csv(
     elif tipo == 3:
 
         return cargar_mini_tabla(
-            filas
+            lineas
         )
 
     # ========================================================
@@ -480,8 +669,38 @@ def procesar_csv(
 
     elif tipo == 4:
 
+        primera_linea = None
+
+        for linea in lineas:
+
+            linea = limpiar_linea(
+                linea
+            )
+
+            if linea is not None:
+
+                primera_linea = linea
+
+                break
+
+        if primera_linea is not None:
+
+            if es_encabezado_tipo_1_2_4(
+                primera_linea
+            ):
+
+                lineas = lineas[
+                    lineas.index(
+                        next(
+                            x for x in lineas
+                            if limpiar_linea(x)
+                            is not None
+                        )
+                    ) + 1:
+                    ]
+
         return cargar_datos_tomados(
-            filas
+            lineas
         )
 
     # ========================================================
@@ -491,11 +710,11 @@ def procesar_csv(
     elif tipo == 5:
 
         return cargar_intervalos(
-            filas
+            lineas
         )
 
     else:
 
         raise ValueError(
-            "Tipo de carga no valido."
+            "Tipo de carga invalido."
         )

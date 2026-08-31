@@ -2,13 +2,17 @@ import math
 
 
 # ============================================================
-# CALCULOS PARA DATOS INDIVIDUALES
+# MEDIDAS PARA DATOS INDIVIDUALES
 # ============================================================
 
 def calcular_media(datos):
 
     return sum(datos) / len(datos)
 
+
+# ============================================================
+# MODA
+# ============================================================
 
 def calcular_moda(datos):
 
@@ -18,6 +22,7 @@ def calcular_moda(datos):
 
         if dato in frecuencias:
             frecuencias[dato] += 1
+
         else:
             frecuencias[dato] = 1
 
@@ -25,7 +30,10 @@ def calcular_moda(datos):
         frecuencias.values()
     )
 
+    # Si todos aparecen una sola vez,
+    # no existe moda.
     if frecuencia_maxima == 1:
+
         return []
 
     modas = []
@@ -33,25 +41,40 @@ def calcular_moda(datos):
     for valor, frecuencia in frecuencias.items():
 
         if frecuencia == frecuencia_maxima:
-            modas.append(valor)
 
-    return sorted(modas)
+            modas.append(
+                valor
+            )
 
+    return sorted(
+        modas
+    )
+
+
+# ============================================================
+# MEDIANA
+# ============================================================
 
 def calcular_mediana(datos):
 
-    datos_ordenados = sorted(datos)
+    datos_ordenados = sorted(
+        datos
+    )
 
-    n = len(datos_ordenados)
+    n = len(
+        datos_ordenados
+    )
 
     posicion_central = n // 2
 
+    # Cantidad impar
     if n % 2 != 0:
 
         return datos_ordenados[
             posicion_central
         ]
 
+    # Cantidad par
     valor1 = datos_ordenados[
         posicion_central - 1
     ]
@@ -65,15 +88,31 @@ def calcular_mediana(datos):
     ) / 2
 
 
+# ============================================================
+# MINIMO
+# ============================================================
+
 def calcular_minimo(datos):
 
-    return min(datos)
+    return min(
+        datos
+    )
 
+
+# ============================================================
+# MAXIMO
+# ============================================================
 
 def calcular_maximo(datos):
 
-    return max(datos)
+    return max(
+        datos
+    )
 
+
+# ============================================================
+# RANGO
+# ============================================================
 
 def calcular_rango(datos):
 
@@ -83,6 +122,10 @@ def calcular_rango(datos):
         calcular_minimo(datos)
     )
 
+
+# ============================================================
+# VARIANZA
+# ============================================================
 
 def calcular_varianza(datos):
 
@@ -103,6 +146,10 @@ def calcular_varianza(datos):
     )
 
 
+# ============================================================
+# DESVIO ESTANDAR
+# ============================================================
+
 def calcular_desvio(datos):
 
     return math.sqrt(
@@ -111,7 +158,6 @@ def calcular_desvio(datos):
 
 
 # ============================================================
-# NUEVO
 # COEFICIENTE DE VARIACION
 # ============================================================
 
@@ -121,28 +167,51 @@ def calcular_coeficiente_variacion(
 ):
 
     """
-    Coeficiente de variacion porcentual:
+    Coeficiente de variacion:
 
-            S
-    CV% = ----- * 100
-           x_barra
+              S
+        CV = ---
+              X
 
-    Permite expresar la dispersion de forma relativa.
     """
 
-    # No se puede dividir por cero.
     if promedio == 0:
+
         return None
 
     return (
         desvio
         /
         abs(promedio)
-    ) * 100
+    )
+
+
+def calcular_coeficiente_variacion_porcentaje(
+    promedio,
+    desvio
+):
+
+    """
+    Coeficiente de variacion porcentual:
+
+               S
+        CV% = --- * 100
+               X
+    """
+
+    cv = calcular_coeficiente_variacion(
+        promedio,
+        desvio
+    )
+
+    if cv is None:
+
+        return None
+
+    return cv * 100
 
 
 # ============================================================
-# NUEVO
 # ASIMETRIA DE PEARSON
 # ============================================================
 
@@ -153,24 +222,11 @@ def calcular_asimetria(
 ):
 
     """
-    Segunda formula de asimetria de Pearson:
-
-              3(x_barra - Me)
-        As = -----------------
-                     S
-
-    donde:
-
-        x_barra = media
-        Me      = mediana
-        S       = desvio estandar
+    As = 3(media - mediana) / S
     """
 
-    # Si el desvio es cero, todos los datos
-    # son iguales y la distribucion no presenta
-    # dispersion.
-
     if desvio == 0:
+
         return 0
 
     return (
@@ -186,25 +242,13 @@ def calcular_asimetria(
     )
 
 
+# ============================================================
+# CLASIFICACION DE ASIMETRIA
+# ============================================================
+
 def clasificar_asimetria(
     asimetria
 ):
-
-    """
-    Clasifica la distribucion de acuerdo
-    con el signo de la asimetria.
-
-    As > 0 -> asimetria positiva / derecha
-
-    As < 0 -> asimetria negativa / izquierda
-
-    As = 0 -> simetrica
-    """
-
-    # Se utiliza una pequeña tolerancia para evitar
-    # clasificar como asimetrico un resultado como
-    # 0.00000000001 causado por los decimales
-    # de punto flotante.
 
     tolerancia = 1e-10
 
@@ -214,11 +258,47 @@ def clasificar_asimetria(
 
     elif asimetria > 0:
 
-        return "Asimetria positiva (hacia la derecha)"
+        return (
+            "Asimetria positiva (derecha)"
+        )
 
     else:
 
-        return "Asimetria negativa (hacia la izquierda)"
+        return (
+            "Asimetria negativa (izquierda)"
+        )
+
+
+# ============================================================
+# LIMITES ASOCIADOS A LA MEDIA
+# ============================================================
+
+def calcular_limites(
+    promedio,
+    desvio
+):
+
+    """
+    Calcula:
+
+        LI = media - desvio
+
+        LS = media + desvio
+
+    """
+
+    limite_inferior = (
+        promedio - desvio
+    )
+
+    limite_superior = (
+        promedio + desvio
+    )
+
+    return (
+        limite_inferior,
+        limite_superior
+    )
 
 
 # ============================================================
@@ -229,6 +309,20 @@ def calcular_cuartil(
     datos,
     k
 ):
+
+    """
+    Posicion:
+
+              k(n + 1)
+        P = -----------
+                  4
+
+    k = 1 -> Q1
+    k = 2 -> Q2
+    k = 3 -> Q3
+
+    Se realiza interpolacion.
+    """
 
     datos_ordenados = sorted(
         datos
@@ -242,10 +336,12 @@ def calcular_cuartil(
         k * (n + 1)
     ) / 4
 
+    # Posicion inferior al primer dato.
     if posicion <= 1:
 
         return datos_ordenados[0]
 
+    # Posicion superior al ultimo dato.
     if posicion >= n:
 
         return datos_ordenados[-1]
@@ -254,7 +350,7 @@ def calcular_cuartil(
         posicion
     )
 
-    decimal = (
+    parte_decimal = (
         posicion
         -
         posicion_inferior
@@ -268,10 +364,10 @@ def calcular_cuartil(
         posicion_inferior
     ]
 
-    resultado = (
+    return (
         valor_inferior
         +
-        decimal
+        parte_decimal
         *
         (
             valor_superior
@@ -280,12 +376,8 @@ def calcular_cuartil(
         )
     )
 
-    return resultado
 
-
-def calcular_cuartiles(
-    datos
-):
+def calcular_cuartiles(datos):
 
     q1 = calcular_cuartil(
         datos,
@@ -302,42 +394,24 @@ def calcular_cuartiles(
         3
     )
 
-    return q1, q2, q3
+    return (
+        q1,
+        q2,
+        q3
+    )
 
 
 # ============================================================
-# TODAS LAS MEDIDAS PARA DATOS INDIVIDUALES
+# MEDIDAS COMPLETAS PARA DATOS INDIVIDUALES
 # ============================================================
 
-def calcular_medidas(
-    datos
-):
-
-    minimo = calcular_minimo(
-        datos
-    )
-
-    maximo = calcular_maximo(
-        datos
-    )
-
-    rango = calcular_rango(
-        datos
-    )
+def calcular_medidas(datos):
 
     promedio = calcular_media(
         datos
     )
 
-    moda = calcular_moda(
-        datos
-    )
-
     mediana = calcular_mediana(
-        datos
-    )
-
-    varianza = calcular_varianza(
         datos
     )
 
@@ -349,81 +423,90 @@ def calcular_medidas(
         datos
     )
 
-    # --------------------------------------------------------
-    # NUEVO
-    # ASIMETRIA
-    # --------------------------------------------------------
-
     asimetria = calcular_asimetria(
         promedio,
         mediana,
         desvio
     )
 
-    tipo_asimetria = (
-        clasificar_asimetria(
-            asimetria
-        )
-    )
-
-    # --------------------------------------------------------
-    # NUEVO
-    # COEFICIENTE DE VARIACION
-    # --------------------------------------------------------
-
-    coeficiente_variacion = (
-        calcular_coeficiente_variacion(
+    limite_inferior, limite_superior = (
+        calcular_limites(
             promedio,
             desvio
         )
     )
 
-    resultados = {
+    return {
 
-        "n": len(datos),
+        "n":
+            len(datos),
 
-        "minimo": minimo,
+        "minimo":
+            calcular_minimo(datos),
 
-        "maximo": maximo,
+        "maximo":
+            calcular_maximo(datos),
 
-        "rango": rango,
+        "rango":
+            calcular_rango(datos),
 
-        "media": promedio,
+        "media":
+            promedio,
 
-        "moda": moda,
+        "moda":
+            calcular_moda(datos),
 
-        "mediana": mediana,
+        "mediana":
+            mediana,
 
-        "varianza": varianza,
+        "varianza":
+            calcular_varianza(datos),
 
-        "desvio": desvio,
+        "desvio":
+            desvio,
 
         "coeficiente_variacion":
-            coeficiente_variacion,
+            calcular_coeficiente_variacion(
+                promedio,
+                desvio
+            ),
+
+        "coeficiente_variacion_porcentaje":
+            calcular_coeficiente_variacion_porcentaje(
+                promedio,
+                desvio
+            ),
 
         "asimetria":
             asimetria,
 
         "tipo_asimetria":
-            tipo_asimetria,
+            clasificar_asimetria(
+                asimetria
+            ),
 
-        "q1": q1,
+        "q1":
+            q1,
 
-        "q2": q2,
+        "q2":
+            q2,
 
-        "q3": q3
+        "q3":
+            q3,
+
+        "li":
+            limite_inferior,
+
+        "ls":
+            limite_superior
     }
-
-    return resultados
 
 
 # ============================================================
 # CONSTRUCCION DE INTERVALOS
 # ============================================================
 
-def construir_intervalos(
-    datos
-):
+def construir_intervalos(datos):
 
     minimo = min(
         datos
@@ -441,6 +524,7 @@ def construir_intervalos(
         maximo - minimo
     )
 
+    # Todos los datos son iguales.
     if rango == 0:
 
         return [
@@ -453,12 +537,10 @@ def construir_intervalos(
         ]
 
     # --------------------------------------------------------
-    # REGLA DE STURGES
-    #
-    # Ni = 1 + 3,3 log(n)
+    # STURGES
     # --------------------------------------------------------
 
-    Ni = (
+    cantidad_intervalos = (
         1
         +
         3.3
@@ -466,8 +548,8 @@ def construir_intervalos(
         math.log10(n)
     )
 
-    Ni = math.ceil(
-        Ni
+    cantidad_intervalos = math.ceil(
+        cantidad_intervalos
     )
 
     # --------------------------------------------------------
@@ -475,7 +557,9 @@ def construir_intervalos(
     # --------------------------------------------------------
 
     amplitud_exacta = (
-        rango / Ni
+        rango
+        /
+        cantidad_intervalos
     )
 
     if amplitud_exacta >= 1:
@@ -509,14 +593,16 @@ def construir_intervalos(
     )
 
     # --------------------------------------------------------
-    # INTERVALOS
+    # CREAR INTERVALOS
     # --------------------------------------------------------
 
     intervalos = []
 
     limite_inferior = minimo
 
-    for i in range(Ni):
+    for i in range(
+        cantidad_intervalos
+    ):
 
         limite_superior = (
             limite_inferior
@@ -525,14 +611,14 @@ def construir_intervalos(
         )
 
         if (
-            i == Ni - 1
+            i == cantidad_intervalos - 1
             and
             limite_superior < maximo
         ):
 
             limite_superior = maximo
 
-        if i == Ni - 1:
+        if i == cantidad_intervalos - 1:
 
             frecuencia = sum(
                 limite_inferior
@@ -586,6 +672,12 @@ def calcular_medidas_agrupadas(
         for intervalo in intervalos
     )
 
+    if n == 0:
+
+        raise ValueError(
+            "La suma de las frecuencias debe ser mayor que cero."
+        )
+
     # --------------------------------------------------------
     # MEDIA
     # --------------------------------------------------------
@@ -623,7 +715,7 @@ def calcular_medidas_agrupadas(
         )
 
     # --------------------------------------------------------
-    # MODA AGRUPADA
+    # MODA
     # --------------------------------------------------------
 
     indice_modal = max(
@@ -715,7 +807,7 @@ def calcular_medidas_agrupadas(
     # CUARTILES AGRUPADOS
     # --------------------------------------------------------
 
-    def cuartil_agrupado(
+    def calcular_cuartil_agrupado(
         k
     ):
 
@@ -725,13 +817,14 @@ def calcular_medidas_agrupadas(
 
         indice = 0
 
-        for i, F in enumerate(
+        for i, frecuencia in enumerate(
             frecuencia_acumulada
         ):
 
-            if F >= posicion:
+            if frecuencia >= posicion:
 
                 indice = i
+
                 break
 
         intervalo = (
@@ -742,7 +835,7 @@ def calcular_medidas_agrupadas(
 
         if indice > 0:
 
-            Fa = (
+            frecuencia_anterior = (
                 frecuencia_acumulada[
                     indice - 1
                 ]
@@ -750,43 +843,41 @@ def calcular_medidas_agrupadas(
 
         else:
 
-            Fa = 0
+            frecuencia_anterior = 0
 
         fi = (
             intervalo["fi"]
         )
 
-        c = (
+        amplitud = (
             intervalo["ls"]
             -
             intervalo["li"]
         )
 
-        resultado = (
+        return (
             intervalo["li"]
             +
-            c
+            amplitud
             *
             (
                 posicion
                 -
-                Fa
+                frecuencia_anterior
             )
             /
             fi
         )
 
-        return resultado
-
-    q1 = cuartil_agrupado(
+    q1 = calcular_cuartil_agrupado(
         1
     )
 
-    q2 = cuartil_agrupado(
+    q2 = calcular_cuartil_agrupado(
         2
     )
 
-    q3 = cuartil_agrupado(
+    q3 = calcular_cuartil_agrupado(
         3
     )
 
@@ -825,38 +916,33 @@ def calcular_medidas_agrupadas(
     )
 
     # --------------------------------------------------------
-    # NUEVO
-    # ASIMETRIA DE PEARSON
+    # ASIMETRIA
     # --------------------------------------------------------
 
-    asimetria = (
-        calcular_asimetria(
-            promedio,
-            mediana,
-            desvio
-        )
-    )
-
-    tipo_asimetria = (
-        clasificar_asimetria(
-            asimetria
-        )
+    asimetria = calcular_asimetria(
+        promedio,
+        mediana,
+        desvio
     )
 
     # --------------------------------------------------------
-    # NUEVO
     # COEFICIENTE DE VARIACION
     # --------------------------------------------------------
 
-    coeficiente_variacion = (
-        calcular_coeficiente_variacion(
+    cv = calcular_coeficiente_variacion(
+        promedio,
+        desvio
+    )
+
+    cv_porcentaje = (
+        calcular_coeficiente_variacion_porcentaje(
             promedio,
             desvio
         )
     )
 
     # --------------------------------------------------------
-    # RANGO CUBIERTO
+    # RANGO DE LOS INTERVALOS
     # --------------------------------------------------------
 
     rango = (
@@ -867,7 +953,8 @@ def calcular_medidas_agrupadas(
 
     return {
 
-        "n": n,
+        "n":
+            n,
 
         "minimo":
             intervalos[0]["li"],
@@ -894,13 +981,18 @@ def calcular_medidas_agrupadas(
             desvio,
 
         "coeficiente_variacion":
-            coeficiente_variacion,
+            cv,
+
+        "coeficiente_variacion_porcentaje":
+            cv_porcentaje,
 
         "asimetria":
             asimetria,
 
         "tipo_asimetria":
-            tipo_asimetria,
+            clasificar_asimetria(
+                asimetria
+            ),
 
         "q1":
             q1,
@@ -909,5 +1001,11 @@ def calcular_medidas_agrupadas(
             q2,
 
         "q3":
-            q3
+            q3,
+
+        "li":
+            promedio - desvio,
+
+        "ls":
+            promedio + desvio
     }

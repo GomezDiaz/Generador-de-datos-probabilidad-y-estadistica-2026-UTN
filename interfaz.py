@@ -17,11 +17,15 @@ def mostrar_menu():
     print("2 - Categorias")
     print("3 - Mini tabla de categorias")
     print("4 - Datos para armar intervalos")
-    print("5 - Limites del intervalo y frecuencia")
+    print("5 - Limites de intervalo y frecuencia")
 
     print()
     print("=" * 60)
 
+
+# ============================================================
+# SELECCIONAR TIPO
+# ============================================================
 
 def seleccionar_tipo():
 
@@ -41,7 +45,9 @@ def seleccionar_tipo():
             "5"
         ):
 
-            return int(opcion)
+            return int(
+                opcion
+            )
 
         print()
         print(
@@ -51,7 +57,7 @@ def seleccionar_tipo():
 
 
 # ============================================================
-# RUTA DEL CSV
+# PEDIR RUTA
 # ============================================================
 
 def pedir_ruta_csv():
@@ -63,13 +69,15 @@ def pedir_ruta_csv():
     ).strip()
 
     # Permite pegar una ruta entre comillas.
-    ruta = ruta.strip('"')
+    ruta = ruta.strip(
+        '"'
+    )
 
     return ruta
 
 
 # ============================================================
-# MOSTRAR DATOS INDIVIDUALES
+# MOSTRAR DATOS
 # ============================================================
 
 def mostrar_datos(
@@ -110,6 +118,10 @@ def mostrar_categorias(
             categoria
         )
 
+
+# ============================================================
+# MOSTRAR FRECUENCIAS
+# ============================================================
 
 def mostrar_frecuencias_categorias(
     frecuencias
@@ -175,19 +187,20 @@ def mostrar_intervalos(
         xi = intervalo["xi"]
 
         print(
-            f"[{li}, {ls})"
+            f"[{li:.2f}, {ls:.2f})"
             f"   fi = {fi}"
-            f"   Xi = {xi}"
+            f"   Xi = {xi:.2f}"
         )
 
 
 # ============================================================
-# MOSTRAR RESULTADOS ESTADISTICOS
+# MOSTRAR RESULTADOS
 # ============================================================
 
 def mostrar_resultados(
     resultados,
-    agrupados=False
+    agrupados=False,
+    mostrar_limites=True
 ):
 
     print()
@@ -198,6 +211,7 @@ def mostrar_resultados(
     if agrupados:
 
         print()
+
         print(
             "NOTA: los resultados son aproximados"
         )
@@ -253,36 +267,36 @@ def mostrar_resultados(
     # MODA
     # --------------------------------------------------------
 
+    moda = resultados["moda"]
+
     if isinstance(
-        resultados["moda"],
+        moda,
         list
     ):
 
-        if resultados["moda"]:
+        if moda:
 
-            modas = ", ".join(
+            texto_moda = ", ".join(
                 f"{x:.2f}"
-                for x in resultados["moda"]
-            )
-
-            print(
-                f"Moda:                  "
-                f"{modas}"
+                for x in moda
             )
 
         else:
 
-            print(
-                "Moda:                  "
+            texto_moda = (
                 "No hay moda"
             )
 
     else:
 
-        print(
-            f"Moda:                  "
-            f"{resultados['moda']:.2f}"
+        texto_moda = (
+            f"{moda:.2f}"
         )
+
+    print(
+        f"Moda:                  "
+        f"{texto_moda}"
+    )
 
     print(
         f"Mediana:               "
@@ -312,19 +326,18 @@ def mostrar_resultados(
     )
 
     # --------------------------------------------------------
-    # COEFICIENTE DE VARIACION
+    # CV DECIMAL
     # --------------------------------------------------------
 
-    if (
-        resultados[
-            "coeficiente_variacion"
-        ]
-        is not None
-    ):
+    cv = resultados[
+        "coeficiente_variacion"
+    ]
+
+    if cv is not None:
 
         print(
             f"Coef. de variacion:    "
-            f"{resultados['coeficiente_variacion']:.2f}%"
+            f"{cv:.2f}"
         )
 
     else:
@@ -332,6 +345,21 @@ def mostrar_resultados(
         print(
             "Coef. de variacion:    "
             "No se puede calcular"
+        )
+
+    # --------------------------------------------------------
+    # CV PORCENTUAL
+    # --------------------------------------------------------
+
+    cv_porcentaje = resultados[
+        "coeficiente_variacion_porcentaje"
+    ]
+
+    if cv_porcentaje is not None:
+
+        print(
+            f"Coef. de variacion %:  "
+            f"{cv_porcentaje:.2f}%"
         )
 
     # ========================================================
@@ -383,12 +411,37 @@ def mostrar_resultados(
         f"{resultados['tipo_asimetria']}"
     )
 
+    # ========================================================
+    # LIMITES
+    # ========================================================
+
+    if mostrar_limites:
+
+        print()
+
+        print(
+            "LIMITES"
+        )
+
+        print("-" * 60)
+
+        print(
+            f"LI:                    "
+            f"{resultados['li']:.2f}"
+        )
+
+        print(
+            f"LS:                    "
+            f"{resultados['ls']:.2f}"
+        )
+
     print()
+
     print("=" * 60)
 
 
 # ============================================================
-# MENSAJES
+# MENSAJE
 # ============================================================
 
 def mostrar_mensaje(
@@ -396,14 +449,21 @@ def mostrar_mensaje(
 ):
 
     print()
-    print(mensaje)
+    print(
+        mensaje
+    )
 
+
+# ============================================================
+# ERROR
+# ============================================================
 
 def mostrar_error(
     mensaje
 ):
 
     print()
+
     print(
         f"ERROR: {mensaje}"
     )

@@ -4,7 +4,7 @@ import interfaz
 
 
 # ============================================================
-# PROCESAMIENTO DE CADA TIPO
+# PROCESAMIENTO
 # ============================================================
 
 def ejecutar_tipo(
@@ -13,7 +13,7 @@ def ejecutar_tipo(
 ):
 
     # --------------------------------------------------------
-    # CARGA DEL CSV
+    # CARGAR CSV
     # --------------------------------------------------------
 
     datos = carga.procesar_csv(
@@ -22,7 +22,7 @@ def ejecutar_tipo(
     )
 
     # ========================================================
-    # TIPO 1 - DATOS TOMADOS
+    # TIPO 1
     # ========================================================
 
     if tipo == 1:
@@ -42,14 +42,22 @@ def ejecutar_tipo(
         )
 
     # ========================================================
-    # TIPO 2 - CATEGORIAS
+    # TIPO 2
     # ========================================================
 
     elif tipo == 2:
 
-        interfaz.mostrar_categorias(
+        # ----------------------------------------------------
+        # Mostrar los datos originales.
+        # ----------------------------------------------------
+
+        interfaz.mostrar_datos(
             datos
         )
+
+        # ----------------------------------------------------
+        # Obtener las frecuencias.
+        # ----------------------------------------------------
 
         frecuencias = (
             carga.calcular_frecuencias_categorias(
@@ -61,18 +69,61 @@ def ejecutar_tipo(
             frecuencias
         )
 
+        # ----------------------------------------------------
+        # Intentar convertir las categorias a numeros.
+        # ----------------------------------------------------
+
+        try:
+
+            datos_numericos = (
+                carga.convertir_categorias_numericas(
+                    datos
+                )
+            )
+
+        except ValueError:
+
+            # ------------------------------------------------
+            # Si no son numericas, se trata como cualitativa.
+            # ------------------------------------------------
+
+            interfaz.mostrar_mensaje(
+                "Las categorias son cualitativas."
+            )
+
+            interfaz.mostrar_mensaje(
+                "No se aplican medidas cuantitativas "
+                "sobre categorias de texto."
+            )
+
+            return
+
+        # ----------------------------------------------------
+        # Si las categorias son numericas:
+        #
+        # se calculan las medidas.
+        # ----------------------------------------------------
+
         interfaz.mostrar_mensaje(
-            "Las categorias son variables cualitativas."
+            "Las categorias contienen valores numericos."
         )
 
         interfaz.mostrar_mensaje(
-            "No se aplican medidas cuantitativas "
-            "como media, varianza o desvio "
-            "sobre los nombres de las categorias."
+            "Se calcularan las medidas estadisticas."
+        )
+
+        resultados = (
+            calculos.calcular_medidas(
+                datos_numericos
+            )
+        )
+
+        interfaz.mostrar_resultados(
+            resultados
         )
 
     # ========================================================
-    # TIPO 3 - MINI TABLA DE CATEGORIAS
+    # TIPO 3
     # ========================================================
 
     elif tipo == 3:
@@ -87,45 +138,57 @@ def ejecutar_tipo(
         )
 
     # ========================================================
-    # TIPO 4 - DATOS PARA ARMAR INTERVALOS
+    # TIPO 4
     # ========================================================
 
     elif tipo == 4:
 
+        # ----------------------------------------------------
         # Mostrar datos originales.
+        # ----------------------------------------------------
+
         interfaz.mostrar_datos(
             datos
         )
 
+        # ----------------------------------------------------
         # Construir intervalos.
+        # ----------------------------------------------------
+
         intervalos = (
             calculos.construir_intervalos(
                 datos
             )
         )
 
+        # ----------------------------------------------------
         # Calcular medidas agrupadas.
+        # ----------------------------------------------------
+
         resultados = (
             calculos.calcular_medidas_agrupadas(
                 intervalos
             )
         )
 
-        # Por ahora NO mostramos la tabla de frecuencias.
+        # ----------------------------------------------------
+        # Mostrar resultados.
+        # ----------------------------------------------------
+
         interfaz.mostrar_resultados(
             resultados,
             agrupados=True
         )
 
     # ========================================================
-    # TIPO 5 - INTERVALOS YA DADOS
+    # TIPO 5
     # ========================================================
 
     elif tipo == 5:
 
-        interfaz.mostrar_intervalos(
-            datos
-        )
+        # ----------------------------------------------------
+        # Calcular medidas agrupadas.
+        # ----------------------------------------------------
 
         resultados = (
             calculos.calcular_medidas_agrupadas(
@@ -135,12 +198,14 @@ def ejecutar_tipo(
 
         interfaz.mostrar_resultados(
             resultados,
-            agrupados=True
+            agrupados=True,
+            mostrar_limites=False
         )
 
         interfaz.mostrar_mensaje(
-            "El rango mostrado corresponde al rango "
-            "cubierto por los limites de los intervalos."
+            "El rango mostrado corresponde "
+            "al rango cubierto por los limites "
+            "de los intervalos."
         )
 
 
@@ -151,21 +216,19 @@ def ejecutar_tipo(
 def main():
 
     # --------------------------------------------------------
-    # 1. Preguntar el tipo de problema
+    # 1. Elegir tipo de problema.
     # --------------------------------------------------------
 
     tipo = interfaz.seleccionar_tipo()
 
     # --------------------------------------------------------
-    # 2. Pedir el CSV
-    #
-    # Esto ocurre DESPUES de seleccionar el tipo.
+    # 2. Pedir CSV DESPUES de seleccionar el tipo.
     # --------------------------------------------------------
 
     ruta = interfaz.pedir_ruta_csv()
 
     # --------------------------------------------------------
-    # 3. Procesar
+    # 3. Procesar.
     # --------------------------------------------------------
 
     ejecutar_tipo(
@@ -175,7 +238,7 @@ def main():
 
 
 # ============================================================
-# INICIO DEL PROGRAMA
+# INICIO
 # ============================================================
 
 if __name__ == "__main__":
@@ -188,6 +251,13 @@ if __name__ == "__main__":
 
         interfaz.mostrar_error(
             "No se encontro el archivo CSV."
+        )
+
+    except PermissionError:
+
+        interfaz.mostrar_error(
+            "No se tiene permiso para acceder "
+            "al archivo."
         )
 
     except ValueError as error:
