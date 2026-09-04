@@ -13,11 +13,10 @@ def mostrar_menu():
     print("Seleccione el tipo de problema:")
     print()
 
-    print("1 - Datos tomados")
-    print("2 - Categorias")
-    print("3 - Mini tabla de categorias")
-    print("4 - Datos para armar intervalos")
-    print("5 - Limites de intervalo y frecuencia")
+    print("1 - Categorias")
+    print("2 - Mini tabla de categorias")
+    print("3 - Datos para armar intervalos")
+    print("4 - Limites de intervalo y frecuencia")
 
     print()
     print("=" * 60)

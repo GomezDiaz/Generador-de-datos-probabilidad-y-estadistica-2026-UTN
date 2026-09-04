@@ -195,7 +195,7 @@ def es_encabezado_tipo_1_2_4(
 
 # ============================================================
 # TIPO 1
-# DATOS TOMADOS
+# DATOS TOMADOS/ esto quedo resagado ya que tipo 2 cumple esta funcion
 # ============================================================
 
 def cargar_datos_tomados(

@@ -21,31 +21,12 @@ def ejecutar_tipo(
         ruta
     )
 
-    # ========================================================
-    # TIPO 1
-    # ========================================================
-
-    if tipo == 1:
-
-        interfaz.mostrar_datos(
-            datos
-        )
-
-        resultados = (
-            calculos.calcular_medidas(
-                datos
-            )
-        )
-
-        interfaz.mostrar_resultados(
-            resultados
-        )
-
+    
     # ========================================================
     # TIPO 2
     # ========================================================
 
-    elif tipo == 2:
+    if tipo == 1:
 
         # ----------------------------------------------------
         # Mostrar los datos originales.
@@ -126,7 +107,7 @@ def ejecutar_tipo(
     # TIPO 3
     # ========================================================
 
-    elif tipo == 3:
+    elif tipo == 2:
 
         interfaz.mostrar_mini_tabla(
             datos
@@ -141,7 +122,7 @@ def ejecutar_tipo(
     # TIPO 4
     # ========================================================
 
-    elif tipo == 4:
+    elif tipo == 3:
 
         # ----------------------------------------------------
         # Mostrar datos originales.
@@ -184,7 +165,7 @@ def ejecutar_tipo(
     # TIPO 5
     # ========================================================
 
-    elif tipo == 5:
+    elif tipo == 4:
 
         # ----------------------------------------------------
         # Calcular medidas agrupadas.
