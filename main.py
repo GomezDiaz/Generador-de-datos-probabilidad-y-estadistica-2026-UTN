@@ -1,273 +1,356 @@
+import sys
+
 import carga
 import calculos
 import interfaz
 
 
 # ============================================================
-# PROCESAMIENTO
+# MÉTODO 1
+# CATEGORÍAS
 # ============================================================
 
-def ejecutar_tipo(
-    tipo,
-    ruta
-):
+def ejecutar_tipo_1(ruta):
 
-    # --------------------------------------------------------
-    # CARGAR CSV
-    # --------------------------------------------------------
-
-    datos = carga.procesar_csv(
-        tipo,
+    datos_originales = carga.procesar_csv(
+        1,
         ruta
+    )["datos"]
+
+    interfaz.mostrar_datos(
+        datos_originales
     )
 
-    # ========================================================
-    # TIPO 1
-    # ========================================================
+    # --------------------------------------------------------
+    # Intentar determinar si las categorías son numéricas
+    # --------------------------------------------------------
+
+    datos_numericos = (
+        carga.convertir_categorias_numericas(
+            datos_originales
+        )
+    )
+
+    if datos_numericos is None:
+
+        # Datos cualitativos
+        frecuencias = {}
+
+        for categoria in datos_originales:
+
+            frecuencias[categoria] = (
+                frecuencias.get(categoria, 0) + 1
+            )
+
+        interfaz.mostrar_mensaje(
+            "Los datos corresponden a categorías cualitativas."
+        )
+
+        interfaz.mostrar_mensaje(
+            "Se calcularon las frecuencias para el gráfico de barras."
+        )
+
+        categorias = list(frecuencias.keys())
+        valores = list(frecuencias.values())
+
+        interfaz.mostrar_diagrama_barras(
+            categorias,
+            valores
+        )
+
+        return
+
+    # --------------------------------------------------------
+    # Datos numéricos
+    # --------------------------------------------------------
+
+    resultados = calculos.calcular_medidas(
+        datos_numericos
+    )
+
+    interfaz.mostrar_resultados(
+        resultados
+    )
+
+    # Para categorías numéricas utilizamos barras
+    frecuencias = {}
+
+    for dato in datos_numericos:
+
+        frecuencias[dato] = (
+            frecuencias.get(dato, 0) + 1
+        )
+
+    categorias = sorted(frecuencias.keys())
+
+    valores = [
+        frecuencias[categoria]
+        for categoria in categorias
+    ]
+
+    interfaz.mostrar_diagrama_barras(
+        categorias,
+        valores
+    )
+
+    interfaz.mostrar_boxplot(
+        datos_numericos,
+        resultados
+    )
+
+
+# ============================================================
+# MÉTODO 2
+# MINI TABLA DE CATEGORÍAS
+# ============================================================
+
+def ejecutar_tipo_2(ruta):
+
+    tabla = carga.procesar_csv(
+        2,
+        ruta
+    )["tabla"]
+
+    interfaz.mostrar_mini_tabla(
+        tabla
+    )
+
+    categorias = [
+        fila[0]
+        for fila in tabla
+    ]
+
+    frecuencias = [
+        fila[1]
+        for fila in tabla
+    ]
+
+    # --------------------------------------------------------
+    # Diagrama de barras
+    # --------------------------------------------------------
+
+    interfaz.mostrar_diagrama_barras(
+        categorias,
+        frecuencias
+    )
+
+    # --------------------------------------------------------
+    # Si todas las categorías son numéricas,
+    # calcular medidas cuantitativas.
+    # --------------------------------------------------------
+
+    categorias_numericas = (
+        carga.convertir_categorias_numericas(
+            categorias
+        )
+    )
+
+    if categorias_numericas is None:
+
+        interfaz.mostrar_mensaje(
+            "Las categorías son cualitativas."
+        )
+
+        return
+
+    # Crear lista expandida
+    datos = calculos.expandir_frecuencias(
+        zip(
+            categorias_numericas,
+            frecuencias
+        )
+    )
+
+    resultados = calculos.calcular_medidas(
+        datos
+    )
+
+    interfaz.mostrar_resultados(
+        resultados
+    )
+
+    interfaz.mostrar_boxplot(
+        datos,
+        resultados
+    )
+
+
+# ============================================================
+# MÉTODO 3
+# DATOS PARA ARMAR INTERVALOS
+# ============================================================
+
+def ejecutar_tipo_3(ruta):
+
+    datos = carga.procesar_csv(
+        3,
+        ruta
+    )["datos"]
+
+    interfaz.mostrar_datos(
+        datos
+    )
+
+    # --------------------------------------------------------
+    # Medidas de datos sin agrupar
+    # --------------------------------------------------------
+
+    resultados = calculos.calcular_medidas(
+        datos
+    )
+
+    interfaz.mostrar_resultados(
+        resultados
+    )
+
+    # --------------------------------------------------------
+    # Construir intervalos
+    # --------------------------------------------------------
+
+    intervalos = calculos.construir_intervalos(
+        datos
+    )
+
+    interfaz.mostrar_intervalos(
+        intervalos
+    )
+
+    # --------------------------------------------------------
+    # Histograma
+    # --------------------------------------------------------
+
+    interfaz.mostrar_histograma(
+        intervalos
+    )
+
+    # --------------------------------------------------------
+    # Boxplot
+    # --------------------------------------------------------
+
+    interfaz.mostrar_boxplot(
+        datos,
+        resultados
+    )
+
+
+# ============================================================
+# MÉTODO 4
+# LÍMITES DEL INTERVALO + FRECUENCIA
+# ============================================================
+
+def ejecutar_tipo_4(ruta):
+
+    intervalos = carga.procesar_csv(
+        4,
+        ruta
+    )["intervalos"]
+
+    interfaz.mostrar_intervalos(
+        intervalos
+    )
+
+    # --------------------------------------------------------
+    # Medidas agrupadas
+    # --------------------------------------------------------
+
+    resultados = calculos.calcular_medidas_agrupadas(
+        intervalos
+    )
+
+    interfaz.mostrar_resultados(
+        resultados,
+        agrupados=True
+    )
+
+    # --------------------------------------------------------
+    # Histograma
+    # --------------------------------------------------------
+
+    interfaz.mostrar_histograma(
+        intervalos
+    )
+
+    # --------------------------------------------------------
+    # Boxplot
+    # --------------------------------------------------------
+
+    interfaz.mostrar_mensaje(
+        "No se genera un boxplot exacto para este método "
+        "porque solamente se conocen los intervalos y sus "
+        "frecuencias, no los valores individuales."
+    )
+
+    interfaz.mostrar_mensaje(
+        "El boxplot exacto requiere los datos originales."
+    )
+
+
+# ============================================================
+# EJECUTAR
+# ============================================================
+
+def ejecutar_tipo(tipo, ruta):
 
     if tipo == 1:
 
-        interfaz.mostrar_datos(
-            datos
-        )
-
-        resultados = (
-            calculos.calcular_medidas(
-                datos
-            )
-        )
-
-        interfaz.mostrar_resultados(
-            resultados
-        )
-
-    # ========================================================
-    # TIPO 2
-    # ========================================================
+        ejecutar_tipo_1(ruta)
 
     elif tipo == 2:
 
-        # ----------------------------------------------------
-        # Mostrar los datos originales.
-        # ----------------------------------------------------
-
-        interfaz.mostrar_datos(
-            datos
-        )
-
-        # ----------------------------------------------------
-        # Obtener las frecuencias.
-        # ----------------------------------------------------
-
-        frecuencias = (
-            carga.calcular_frecuencias_categorias(
-                datos
-            )
-        )
-
-        interfaz.mostrar_frecuencias_categorias(
-            frecuencias
-        )
-
-        # ----------------------------------------------------
-        # Intentar convertir las categorias a numeros.
-        # ----------------------------------------------------
-
-        try:
-
-            datos_numericos = (
-                carga.convertir_categorias_numericas(
-                    datos
-                )
-            )
-
-        except ValueError:
-
-            # ------------------------------------------------
-            # Si no son numericas, se trata como cualitativa.
-            # ------------------------------------------------
-
-            interfaz.mostrar_mensaje(
-                "Las categorias son cualitativas."
-            )
-
-            interfaz.mostrar_mensaje(
-                "No se aplican medidas cuantitativas "
-                "sobre categorias de texto."
-            )
-
-            return
-
-        # ----------------------------------------------------
-        # Si las categorias son numericas:
-        #
-        # se calculan las medidas.
-        # ----------------------------------------------------
-
-        interfaz.mostrar_mensaje(
-            "Las categorias contienen valores numericos."
-        )
-
-        interfaz.mostrar_mensaje(
-            "Se calcularan las medidas estadisticas."
-        )
-
-        resultados = (
-            calculos.calcular_medidas(
-                datos_numericos
-            )
-        )
-
-        interfaz.mostrar_resultados(
-            resultados
-        )
-
-    # ========================================================
-    # TIPO 3
-    # ========================================================
+        ejecutar_tipo_2(ruta)
 
     elif tipo == 3:
 
-        interfaz.mostrar_mini_tabla(
-            datos
-        )
-
-        interfaz.mostrar_mensaje(
-            "Las frecuencias fueron proporcionadas "
-            "directamente en el archivo CSV."
-        )
-
-    # ========================================================
-    # TIPO 4
-    # ========================================================
+        ejecutar_tipo_3(ruta)
 
     elif tipo == 4:
 
-        # ----------------------------------------------------
-        # Mostrar datos originales.
-        # ----------------------------------------------------
+        ejecutar_tipo_4(ruta)
 
-        interfaz.mostrar_datos(
-            datos
-        )
+    else:
 
-        # ----------------------------------------------------
-        # Construir intervalos.
-        # ----------------------------------------------------
-
-        intervalos = (
-            calculos.construir_intervalos(
-                datos
-            )
-        )
-
-        # ----------------------------------------------------
-        # Calcular medidas agrupadas.
-        # ----------------------------------------------------
-
-        resultados = (
-            calculos.calcular_medidas_agrupadas(
-                intervalos
-            )
-        )
-
-        # ----------------------------------------------------
-        # Mostrar resultados.
-        # ----------------------------------------------------
-
-        interfaz.mostrar_resultados(
-            resultados,
-            agrupados=True
-        )
-
-    # ========================================================
-    # TIPO 5
-    # ========================================================
-
-    elif tipo == 5:
-
-        # ----------------------------------------------------
-        # Calcular medidas agrupadas.
-        # ----------------------------------------------------
-
-        resultados = (
-            calculos.calcular_medidas_agrupadas(
-                datos
-            )
-        )
-
-        interfaz.mostrar_resultados(
-            resultados,
-            agrupados=True,
-            mostrar_limites=False
-        )
-
-        interfaz.mostrar_mensaje(
-            "El rango mostrado corresponde "
-            "al rango cubierto por los limites "
-            "de los intervalos."
+        raise ValueError(
+            "Tipo de entrada inválido."
         )
 
 
 # ============================================================
-# PROGRAMA PRINCIPAL
+# MAIN
 # ============================================================
 
 def main():
 
-    # --------------------------------------------------------
-    # 1. Elegir tipo de problema.
-    # --------------------------------------------------------
+    interfaz.mostrar_menu()
 
     tipo = interfaz.seleccionar_tipo()
 
-    # --------------------------------------------------------
-    # 2. Pedir CSV DESPUES de seleccionar el tipo.
-    # --------------------------------------------------------
-
     ruta = interfaz.pedir_ruta_csv()
-
-    # --------------------------------------------------------
-    # 3. Procesar.
-    # --------------------------------------------------------
-
-    ejecutar_tipo(
-        tipo,
-        ruta
-    )
-
-
-# ============================================================
-# INICIO
-# ============================================================
-
-if __name__ == "__main__":
 
     try:
 
-        main()
+        ejecutar_tipo(
+            tipo,
+            ruta
+        )
 
     except FileNotFoundError:
 
         interfaz.mostrar_error(
-            "No se encontro el archivo CSV."
-        )
-
-    except PermissionError:
-
-        interfaz.mostrar_error(
-            "No se tiene permiso para acceder "
-            "al archivo."
+            "No se encontró el archivo indicado."
         )
 
     except ValueError as error:
 
         interfaz.mostrar_error(
-            str(error)
+            f"Los datos del CSV no son válidos.\n{error}"
         )
 
     except Exception as error:
 
         interfaz.mostrar_error(
-            f"Error inesperado: {error}"
+            f"Ocurrió un error inesperado:\n{error}"
         )
+
+
+if __name__ == "__main__":
+    main()

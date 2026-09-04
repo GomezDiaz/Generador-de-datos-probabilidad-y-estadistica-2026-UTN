@@ -1,426 +1,367 @@
 import math
+from collections import Counter
 
 
 # ============================================================
-# MEDIDAS PARA DATOS INDIVIDUALES
+# FUNCIONES BÁSICAS
 # ============================================================
 
 def calcular_media(datos):
+    if not datos:
+        return None
 
     return sum(datos) / len(datos)
 
 
-# ============================================================
-# MODA
-# ============================================================
-
 def calcular_moda(datos):
+    if not datos:
+        return None
 
-    frecuencias = {}
+    frecuencias = Counter(datos)
+    frecuencia_maxima = max(frecuencias.values())
 
-    for dato in datos:
-
-        if dato in frecuencias:
-            frecuencias[dato] += 1
-
-        else:
-            frecuencias[dato] = 1
-
-    frecuencia_maxima = max(
-        frecuencias.values()
-    )
-
-    # Si todos aparecen una sola vez,
-    # no existe moda.
     if frecuencia_maxima == 1:
+        return None
 
-        return []
+    modas = [
+        valor
+        for valor, frecuencia in frecuencias.items()
+        if frecuencia == frecuencia_maxima
+    ]
 
-    modas = []
+    modas.sort()
 
-    for valor, frecuencia in frecuencias.items():
+    if len(modas) == 1:
+        return modas[0]
 
-        if frecuencia == frecuencia_maxima:
+    return modas
 
-            modas.append(
-                valor
-            )
-
-    return sorted(
-        modas
-    )
-
-
-# ============================================================
-# MEDIANA
-# ============================================================
 
 def calcular_mediana(datos):
+    if not datos:
+        return None
 
-    datos_ordenados = sorted(
-        datos
-    )
+    ordenados = sorted(datos)
+    n = len(ordenados)
 
-    n = len(
-        datos_ordenados
-    )
+    mitad = n // 2
 
-    posicion_central = n // 2
+    if n % 2 == 0:
+        return (ordenados[mitad - 1] + ordenados[mitad]) / 2
 
-    # Cantidad impar
-    if n % 2 != 0:
+    return ordenados[mitad]
 
-        return datos_ordenados[
-            posicion_central
-        ]
-
-    # Cantidad par
-    valor1 = datos_ordenados[
-        posicion_central - 1
-    ]
-
-    valor2 = datos_ordenados[
-        posicion_central
-    ]
-
-    return (
-        valor1 + valor2
-    ) / 2
-
-
-# ============================================================
-# MINIMO
-# ============================================================
 
 def calcular_minimo(datos):
+    return min(datos) if datos else None
 
-    return min(
-        datos
-    )
-
-
-# ============================================================
-# MAXIMO
-# ============================================================
 
 def calcular_maximo(datos):
+    return max(datos) if datos else None
 
-    return max(
-        datos
-    )
-
-
-# ============================================================
-# RANGO
-# ============================================================
 
 def calcular_rango(datos):
+    if not datos:
+        return None
 
-    return (
-        calcular_maximo(datos)
-        -
-        calcular_minimo(datos)
-    )
+    return max(datos) - min(datos)
 
 
 # ============================================================
-# VARIANZA
+# VARIANZA Y DESVÍO ESTÁNDAR MUESTRAL
 # ============================================================
 
 def calcular_varianza(datos):
-
-    promedio = calcular_media(
-        datos
-    )
-
-    suma = 0
-
-    for dato in datos:
-
-        suma += (
-            dato - promedio
-        ) ** 2
-
-    return (
-        suma / len(datos)
-    )
-
-
-# ============================================================
-# DESVIO ESTANDAR
-# ============================================================
-
-def calcular_desvio(datos):
-
-    return math.sqrt(
-        calcular_varianza(datos)
-    )
-
-
-# ============================================================
-# COEFICIENTE DE VARIACION
-# ============================================================
-
-def calcular_coeficiente_variacion(
-    promedio,
-    desvio
-):
-
     """
-    Coeficiente de variacion:
+    Varianza muestral:
 
-              S
-        CV = ---
-              X
+        S² = Σ(x - x̄)² / (n - 1)
 
+    Se utiliza n-1 porque los datos representan una muestra.
     """
 
-    if promedio == 0:
+    n = len(datos)
 
+    if n < 2:
         return None
 
-    return (
-        desvio
-        /
-        abs(promedio)
-    )
+    media = calcular_media(datos)
+
+    suma = sum((x - media) ** 2 for x in datos)
+
+    return suma / (n - 1)
 
 
-def calcular_coeficiente_variacion_porcentaje(
-    promedio,
-    desvio
-):
+def calcular_desvio(datos):
+    varianza = calcular_varianza(datos)
 
+    if varianza is None:
+        return None
+
+    return math.sqrt(varianza)
+
+
+# ============================================================
+# COEFICIENTE DE VARIACIÓN
+# ============================================================
+
+def calcular_coeficiente_variacion(promedio, desvio):
     """
-    Coeficiente de variacion porcentual:
+    Devuelve el coeficiente de variación como proporción.
 
-               S
-        CV% = --- * 100
-               X
+    Ejemplo:
+        0.14 = 14%
     """
 
-    cv = calcular_coeficiente_variacion(
-        promedio,
-        desvio
-    )
+    if promedio is None or desvio is None or promedio == 0:
+        return None
+
+    return desvio / abs(promedio)
+
+
+def calcular_coeficiente_variacion_porcentaje(promedio, desvio):
+    cv = calcular_coeficiente_variacion(promedio, desvio)
 
     if cv is None:
-
         return None
 
     return cv * 100
 
 
 # ============================================================
-# ASIMETRIA DE PEARSON
+# ASIMETRÍA
 # ============================================================
 
-def calcular_asimetria(
-    promedio,
-    mediana,
-    desvio
-):
+def calcular_asimetria(promedio, mediana, desvio):
+    """
+    Coeficiente de asimetría utilizado en U2:
 
+        As = 3(x̄ - Me) / S
     """
-    As = 3(media - mediana) / S
-    """
+
+    if promedio is None or mediana is None or desvio is None:
+        return None
 
     if desvio == 0:
-
         return 0
 
-    return (
-        3
-        *
-        (
-            promedio
-            -
-            mediana
-        )
-        /
-        desvio
-    )
+    return 3 * (promedio - mediana) / desvio
 
 
-# ============================================================
-# CLASIFICACION DE ASIMETRIA
-# ============================================================
+def clasificar_asimetria(asimetria):
+    if asimetria is None:
+        return "No se puede determinar"
 
-def clasificar_asimetria(
-    asimetria
-):
+    if asimetria == 0:
+        return "Simétrica"
 
-    tolerancia = 1e-10
+    if asimetria > 0:
+        return "Asimetría positiva (derecha)"
 
-    if abs(asimetria) < tolerancia:
+    return "Asimetría negativa (izquierda)"
 
-        return "Simetrica"
 
-    elif asimetria > 0:
+def interpretar_asimetria(asimetria):
+    if asimetria is None:
+        return "No se puede determinar la asimetría."
 
+    if asimetria == 0:
         return (
-            "Asimetria positiva (derecha)"
+            "La distribución es simétrica. "
+            "La media y la mediana tienden a coincidir."
         )
 
+    direccion = clasificar_asimetria(asimetria)
+
+    if abs(asimetria) <= 0.2:
+        representatividad = (
+            "La media sigue siendo representativa de la distribución "
+            "porque |As| <= 0,20."
+        )
     else:
-
-        return (
-            "Asimetria negativa (izquierda)"
+        representatividad = (
+            "La media deja de ser representativa porque |As| > 0,20. "
+            "La mediana o la moda representan mejor los datos."
         )
 
+    return f"{direccion}. {representatividad}"
+
 
 # ============================================================
-# LIMITES ASOCIADOS A LA MEDIA
+# LÍMITES MEDIA ± DESVÍO
 # ============================================================
 
-def calcular_limites(
-    promedio,
-    desvio
-):
+def calcular_limites(promedio, desvio):
+    if promedio is None or desvio is None:
+        return None, None
 
-    """
-    Calcula:
+    li = promedio - desvio
+    ls = promedio + desvio
 
-        LI = media - desvio
-
-        LS = media + desvio
-
-    """
-
-    limite_inferior = (
-        promedio - desvio
-    )
-
-    limite_superior = (
-        promedio + desvio
-    )
-
-    return (
-        limite_inferior,
-        limite_superior
-    )
+    return li, ls
 
 
 # ============================================================
 # CUARTILES
+# MÉTODO k(n+1)/4 CON INTERPOLACIÓN
 # ============================================================
 
-def calcular_cuartil(
-    datos,
-    k
-):
-
+def calcular_cuartil(datos, k):
     """
-    Posicion:
+    Método utilizado para datos sin agrupar:
 
-              k(n + 1)
-        P = -----------
-                  4
+        Pk = k(n + 1) / 4
 
-    k = 1 -> Q1
-    k = 2 -> Q2
-    k = 3 -> Q3
-
-    Se realiza interpolacion.
+    Se utiliza interpolación cuando la posición no es entera.
     """
 
-    datos_ordenados = sorted(
-        datos
-    )
+    if not datos:
+        return None
 
-    n = len(
-        datos_ordenados
-    )
+    if k not in (1, 2, 3):
+        raise ValueError("El cuartil debe ser 1, 2 o 3.")
 
-    posicion = (
-        k * (n + 1)
-    ) / 4
+    ordenados = sorted(datos)
+    n = len(ordenados)
 
-    # Posicion inferior al primer dato.
+    posicion = k * (n + 1) / 4
+
+    # Caso inferior
     if posicion <= 1:
+        return ordenados[0]
 
-        return datos_ordenados[0]
-
-    # Posicion superior al ultimo dato.
+    # Caso superior
     if posicion >= n:
+        return ordenados[-1]
 
-        return datos_ordenados[-1]
+    inferior = int(math.floor(posicion))
+    decimal = posicion - inferior
 
-    posicion_inferior = math.floor(
-        posicion
-    )
+    valor_inferior = ordenados[inferior - 1]
+    valor_superior = ordenados[inferior]
 
-    parte_decimal = (
-        posicion
-        -
-        posicion_inferior
-    )
-
-    valor_inferior = datos_ordenados[
-        posicion_inferior - 1
-    ]
-
-    valor_superior = datos_ordenados[
-        posicion_inferior
-    ]
-
-    return (
-        valor_inferior
-        +
-        parte_decimal
-        *
-        (
-            valor_superior
-            -
-            valor_inferior
-        )
+    return valor_inferior + decimal * (
+        valor_superior - valor_inferior
     )
 
 
 def calcular_cuartiles(datos):
-
-    q1 = calcular_cuartil(
-        datos,
-        1
-    )
-
-    q2 = calcular_cuartil(
-        datos,
-        2
-    )
-
-    q3 = calcular_cuartil(
-        datos,
-        3
-    )
-
-    return (
-        q1,
-        q2,
-        q3
-    )
+    return {
+        "Q1": calcular_cuartil(datos, 1),
+        "Q2": calcular_cuartil(datos, 2),
+        "Q3": calcular_cuartil(datos, 3)
+    }
 
 
 # ============================================================
-# MEDIDAS COMPLETAS PARA DATOS INDIVIDUALES
+# RANGO INTERCUARTÍLICO Y OUTLIERS
+# ============================================================
+
+def calcular_iqr(q1, q3):
+    if q1 is None or q3 is None:
+        return None
+
+    return q3 - q1
+
+
+def calcular_limites_boxplot(q1, q3):
+    """
+    Límites utilizados para detectar valores atípicos:
+
+        LI = Q1 - 1,5 * IQR
+        LS = Q3 + 1,5 * IQR
+    """
+
+    iqr = calcular_iqr(q1, q3)
+
+    if iqr is None:
+        return None, None
+
+    limite_inferior = q1 - 1.5 * iqr
+    limite_superior = q3 + 1.5 * iqr
+
+    return limite_inferior, limite_superior
+
+
+def detectar_outliers(datos, q1, q3):
+    if not datos or q1 is None or q3 is None:
+        return []
+
+    limite_inferior, limite_superior = calcular_limites_boxplot(
+        q1, q3
+    )
+
+    outliers = [
+        x for x in datos
+        if x < limite_inferior or x > limite_superior
+    ]
+
+    return sorted(outliers)
+
+
+def calcular_bigotes(datos, q1, q3):
+    """
+    Los bigotes no necesariamente llegan al mínimo y máximo.
+    Llegan hasta los valores más extremos que todavía no son
+    considerados atípicos.
+    """
+
+    if not datos:
+        return None, None
+
+    limite_inferior, limite_superior = calcular_limites_boxplot(
+        q1, q3
+    )
+
+    datos_validos_inferior = [
+        x for x in datos
+        if x >= limite_inferior
+    ]
+
+    datos_validos_superior = [
+        x for x in datos
+        if x <= limite_superior
+    ]
+
+    if datos_validos_inferior:
+        bigote_inferior = min(datos_validos_inferior)
+    else:
+        bigote_inferior = min(datos)
+
+    if datos_validos_superior:
+        bigote_superior = max(datos_validos_superior)
+    else:
+        bigote_superior = max(datos)
+
+    return bigote_inferior, bigote_superior
+
+
+# ============================================================
+# MEDIDAS COMPLETAS PARA DATOS SIN AGRUPAR
 # ============================================================
 
 def calcular_medidas(datos):
 
-    promedio = calcular_media(
-        datos
+    if not datos:
+        return {}
+
+    datos = [float(x) for x in datos]
+
+    promedio = calcular_media(datos)
+    mediana = calcular_mediana(datos)
+    moda = calcular_moda(datos)
+
+    varianza = calcular_varianza(datos)
+    desvio = calcular_desvio(datos)
+
+    cv = calcular_coeficiente_variacion(
+        promedio,
+        desvio
     )
 
-    mediana = calcular_mediana(
-        datos
-    )
-
-    desvio = calcular_desvio(
-        datos
-    )
-
-    q1, q2, q3 = calcular_cuartiles(
-        datos
+    cv_porcentaje = calcular_coeficiente_variacion_porcentaje(
+        promedio,
+        desvio
     )
 
     asimetria = calcular_asimetria(
@@ -429,232 +370,177 @@ def calcular_medidas(datos):
         desvio
     )
 
-    limite_inferior, limite_superior = (
-        calcular_limites(
-            promedio,
-            desvio
-        )
+    cuartiles = calcular_cuartiles(datos)
+
+    q1 = cuartiles["Q1"]
+    q2 = cuartiles["Q2"]
+    q3 = cuartiles["Q3"]
+
+    iqr = calcular_iqr(q1, q3)
+
+    limite_box_inferior, limite_box_superior = (
+        calcular_limites_boxplot(q1, q3)
+    )
+
+    bigote_inferior, bigote_superior = calcular_bigotes(
+        datos,
+        q1,
+        q3
+    )
+
+    outliers = detectar_outliers(
+        datos,
+        q1,
+        q3
+    )
+
+    limite_inferior, limite_superior = calcular_limites(
+        promedio,
+        desvio
     )
 
     return {
+        "n": len(datos),
 
-        "n":
-            len(datos),
+        "minimo": calcular_minimo(datos),
+        "maximo": calcular_maximo(datos),
+        "rango": calcular_rango(datos),
 
-        "minimo":
-            calcular_minimo(datos),
+        "media": promedio,
+        "mediana": mediana,
+        "moda": moda,
 
-        "maximo":
-            calcular_maximo(datos),
+        "varianza": varianza,
+        "desvio": desvio,
 
-        "rango":
-            calcular_rango(datos),
+        "cv": cv,
+        "cv_porcentaje": cv_porcentaje,
 
-        "media":
-            promedio,
+        "asimetria": asimetria,
+        "clasificacion_asimetria": clasificar_asimetria(
+            asimetria
+        ),
 
-        "moda":
-            calcular_moda(datos),
+        "Q1": q1,
+        "Q2": q2,
+        "Q3": q3,
+        "IQR": iqr,
 
-        "mediana":
-            mediana,
+        "limite_box_inferior": limite_box_inferior,
+        "limite_box_superior": limite_box_superior,
 
-        "varianza":
-            calcular_varianza(datos),
+        "bigote_inferior": bigote_inferior,
+        "bigote_superior": bigote_superior,
 
-        "desvio":
-            desvio,
+        "outliers": outliers,
 
-        "coeficiente_variacion":
-            calcular_coeficiente_variacion(
-                promedio,
-                desvio
-            ),
-
-        "coeficiente_variacion_porcentaje":
-            calcular_coeficiente_variacion_porcentaje(
-                promedio,
-                desvio
-            ),
-
-        "asimetria":
-            asimetria,
-
-        "tipo_asimetria":
-            clasificar_asimetria(
-                asimetria
-            ),
-
-        "q1":
-            q1,
-
-        "q2":
-            q2,
-
-        "q3":
-            q3,
-
-        "li":
-            limite_inferior,
-
-        "ls":
-            limite_superior
+        "LI": limite_inferior,
+        "LS": limite_superior
     }
 
 
 # ============================================================
-# CONSTRUCCION DE INTERVALOS
+# CONSTRUCCIÓN DE INTERVALOS
 # ============================================================
 
 def construir_intervalos(datos):
 
-    minimo = min(
-        datos
-    )
+    if not datos:
+        return []
 
-    maximo = max(
-        datos
-    )
+    datos = sorted(float(x) for x in datos)
 
-    n = len(
-        datos
-    )
+    n = len(datos)
 
-    rango = (
-        maximo - minimo
-    )
+    minimo = min(datos)
+    maximo = max(datos)
 
-    # Todos los datos son iguales.
-    if rango == 0:
+    if minimo == maximo:
+        return [{
+            "li": minimo,
+            "ls": maximo,
+            "frecuencia": n,
+            "hi": 1,
+            "hiporcentaje": 100,
+            "xi": minimo,
+            "frecuencia_acumulada": n,
+            "hi_acumulada": 1,
+            "hi_acumulada_porcentaje": 100
+        }]
 
-        return [
-            {
-                "li": minimo,
-                "ls": maximo,
-                "fi": n,
-                "xi": minimo
-            }
-        ]
-
-    # --------------------------------------------------------
-    # STURGES
-    # --------------------------------------------------------
-
-    cantidad_intervalos = (
-        1
-        +
-        3.3
-        *
-        math.log10(n)
-    )
-
+    # Regla de Sturges
     cantidad_intervalos = math.ceil(
-        cantidad_intervalos
+        1 + 3.3 * math.log10(n)
     )
 
-    # --------------------------------------------------------
-    # AMPLITUD
-    # --------------------------------------------------------
+    amplitud = (maximo - minimo) / cantidad_intervalos
 
-    amplitud_exacta = (
-        rango
-        /
-        cantidad_intervalos
-    )
+    # Redondeo hacia arriba para obtener intervalos sencillos
+    if amplitud >= 1:
+        amplitud = math.ceil(amplitud)
 
-    if amplitud_exacta >= 1:
+    elif amplitud >= 0.1:
+        amplitud = math.ceil(amplitud * 10) / 10
 
-        decimales = 0
-
-    elif amplitud_exacta >= 0.1:
-
-        decimales = 1
-
-    elif amplitud_exacta >= 0.01:
-
-        decimales = 2
+    elif amplitud >= 0.01:
+        amplitud = math.ceil(amplitud * 100) / 100
 
     else:
-
-        decimales = 3
-
-    factor = (
-        10 ** decimales
-    )
-
-    amplitud = (
-        math.ceil(
-            amplitud_exacta
-            *
-            factor
-        )
-        /
-        factor
-    )
-
-    # --------------------------------------------------------
-    # CREAR INTERVALOS
-    # --------------------------------------------------------
+        amplitud = math.ceil(amplitud * 1000) / 1000
 
     intervalos = []
 
-    limite_inferior = minimo
+    li = minimo
 
-    for i in range(
-        cantidad_intervalos
-    ):
+    for i in range(cantidad_intervalos):
 
-        limite_superior = (
-            limite_inferior
-            +
-            amplitud
-        )
-
-        if (
-            i == cantidad_intervalos - 1
-            and
-            limite_superior < maximo
-        ):
-
-            limite_superior = maximo
+        ls = li + amplitud
 
         if i == cantidad_intervalos - 1:
+            ls = max(ls, maximo)
 
-            frecuencia = sum(
-                limite_inferior
-                <= dato
-                <= limite_superior
-                for dato in datos
-            )
+        frecuencia = 0
 
-        else:
+        for valor in datos:
 
-            frecuencia = sum(
-                limite_inferior
-                <= dato
-                <
-                limite_superior
-                for dato in datos
-            )
+            if i == cantidad_intervalos - 1:
+                if li <= valor <= ls:
+                    frecuencia += 1
 
-        xi = (
-            limite_inferior
-            +
-            limite_superior
-        ) / 2
+            else:
+                if li <= valor < ls:
+                    frecuencia += 1
 
-        intervalos.append(
-            {
-                "li": limite_inferior,
-                "ls": limite_superior,
-                "fi": frecuencia,
-                "xi": xi
-            }
-        )
+        xi = (li + ls) / 2
 
-        limite_inferior = (
-            limite_superior
-        )
+        intervalos.append({
+            "li": li,
+            "ls": ls,
+            "frecuencia": frecuencia,
+            "xi": xi
+        })
+
+        li = ls
+
+    # Frecuencias acumuladas
+    acumulada = 0
+
+    for intervalo in intervalos:
+
+        fi = intervalo["frecuencia"]
+
+        hi = fi / n
+
+        acumulada += fi
+
+        intervalo["hi"] = hi
+        intervalo["hiporcentaje"] = hi * 100
+
+        intervalo["frecuencia_acumulada"] = acumulada
+        intervalo["hi_acumulada"] = acumulada / n
+        intervalo["hi_acumulada_porcentaje"] = (
+            acumulada / n
+        ) * 100
 
     return intervalos
 
@@ -663,349 +549,275 @@ def construir_intervalos(datos):
 # MEDIDAS PARA DATOS AGRUPADOS
 # ============================================================
 
-def calcular_medidas_agrupadas(
-    intervalos
-):
+def calcular_media_agrupada(intervalos):
 
-    n = sum(
-        intervalo["fi"]
-        for intervalo in intervalos
-    )
+    n = sum(i["frecuencia"] for i in intervalos)
 
     if n == 0:
+        return None
 
-        raise ValueError(
-            "La suma de las frecuencias debe ser mayor que cero."
-        )
+    suma = sum(
+        i["xi"] * i["frecuencia"]
+        for i in intervalos
+    )
 
-    # --------------------------------------------------------
-    # MEDIA
-    # --------------------------------------------------------
+    return suma / n
 
-    suma_xifi = 0
+
+def encontrar_intervalo_posicion(intervalos, posicion):
 
     for intervalo in intervalos:
 
-        suma_xifi += (
-            intervalo["xi"]
-            *
-            intervalo["fi"]
-        )
+        if intervalo["frecuencia_acumulada"] >= posicion:
+            return intervalo
 
-    promedio = (
-        suma_xifi / n
+    return intervalos[-1]
+
+
+def calcular_mediana_agrupada(intervalos):
+
+    n = sum(i["frecuencia"] for i in intervalos)
+
+    if n == 0:
+        return None
+
+    posicion = n / 2
+
+    intervalo = encontrar_intervalo_posicion(
+        intervalos,
+        posicion
     )
 
-    # --------------------------------------------------------
-    # FRECUENCIA ACUMULADA
-    # --------------------------------------------------------
+    indice = intervalos.index(intervalo)
 
-    frecuencia_acumulada = []
+    frecuencia_anterior = 0
 
-    acumulada = 0
-
-    for intervalo in intervalos:
-
-        acumulada += (
-            intervalo["fi"]
-        )
-
-        frecuencia_acumulada.append(
-            acumulada
-        )
-
-    # --------------------------------------------------------
-    # MODA
-    # --------------------------------------------------------
-
-    indice_modal = max(
-        range(
-            len(intervalos)
-        ),
-        key=lambda i:
-            intervalos[i]["fi"]
-    )
-
-    intervalo_modal = (
-        intervalos[
-            indice_modal
-        ]
-    )
-
-    if indice_modal > 0:
-
+    if indice > 0:
         frecuencia_anterior = (
-            intervalos[
-                indice_modal - 1
-            ]["fi"]
+            intervalos[indice - 1]["frecuencia_acumulada"]
         )
 
-    else:
+    frecuencia_intervalo = intervalo["frecuencia"]
 
-        frecuencia_anterior = 0
+    amplitud = intervalo["ls"] - intervalo["li"]
 
-    if (
-        indice_modal
-        <
-        len(intervalos) - 1
-    ):
+    if frecuencia_intervalo == 0:
+        return intervalo["li"]
 
+    return (
+        intervalo["li"]
+        + amplitud
+        * (
+            (posicion - frecuencia_anterior)
+            / frecuencia_intervalo
+        )
+    )
+
+
+def calcular_moda_agrupada(intervalos):
+
+    if not intervalos:
+        return None
+
+    intervalo_modal = max(
+        intervalos,
+        key=lambda x: x["frecuencia"]
+    )
+
+    indice = intervalos.index(intervalo_modal)
+
+    frecuencia_modal = intervalo_modal["frecuencia"]
+
+    frecuencia_anterior = 0
+    frecuencia_siguiente = 0
+
+    if indice > 0:
+        frecuencia_anterior = (
+            intervalos[indice - 1]["frecuencia"]
+        )
+
+    if indice < len(intervalos) - 1:
         frecuencia_siguiente = (
-            intervalos[
-                indice_modal + 1
-            ]["fi"]
+            intervalos[indice + 1]["frecuencia"]
         )
 
-    else:
+    delta1 = frecuencia_modal - frecuencia_anterior
+    delta2 = frecuencia_modal - frecuencia_siguiente
 
-        frecuencia_siguiente = 0
+    amplitud = intervalo_modal["ls"] - intervalo_modal["li"]
 
-    delta1 = (
-        intervalo_modal["fi"]
-        -
-        frecuencia_anterior
-    )
+    denominador = delta1 + delta2
 
-    delta2 = (
-        intervalo_modal["fi"]
-        -
-        frecuencia_siguiente
-    )
+    if denominador == 0:
+        return intervalo_modal["xi"]
 
-    amplitud = (
-        intervalo_modal["ls"]
-        -
+    return (
         intervalo_modal["li"]
+        + amplitud * delta1 / denominador
     )
 
-    if (
-        delta1 + delta2
-        != 0
-    ):
 
-        moda = (
-            intervalo_modal["li"]
-            +
-            amplitud
-            *
-            delta1
-            /
-            (
-                delta1
-                +
-                delta2
-            )
-        )
+def calcular_cuartil_agrupado(intervalos, k):
 
-    else:
+    n = sum(i["frecuencia"] for i in intervalos)
 
-        moda = (
-            intervalo_modal["xi"]
-        )
+    if n == 0:
+        return None
 
-    # --------------------------------------------------------
-    # CUARTILES AGRUPADOS
-    # --------------------------------------------------------
+    posicion = k * n / 4
 
-    def calcular_cuartil_agrupado(
-        k
-    ):
-
-        posicion = (
-            k * n
-        ) / 4
-
-        indice = 0
-
-        for i, frecuencia in enumerate(
-            frecuencia_acumulada
-        ):
-
-            if frecuencia >= posicion:
-
-                indice = i
-
-                break
-
-        intervalo = (
-            intervalos[
-                indice
-            ]
-        )
-
-        if indice > 0:
-
-            frecuencia_anterior = (
-                frecuencia_acumulada[
-                    indice - 1
-                ]
-            )
-
-        else:
-
-            frecuencia_anterior = 0
-
-        fi = (
-            intervalo["fi"]
-        )
-
-        amplitud = (
-            intervalo["ls"]
-            -
-            intervalo["li"]
-        )
-
-        return (
-            intervalo["li"]
-            +
-            amplitud
-            *
-            (
-                posicion
-                -
-                frecuencia_anterior
-            )
-            /
-            fi
-        )
-
-    q1 = calcular_cuartil_agrupado(
-        1
+    intervalo = encontrar_intervalo_posicion(
+        intervalos,
+        posicion
     )
 
-    q2 = calcular_cuartil_agrupado(
-        2
-    )
+    indice = intervalos.index(intervalo)
 
-    q3 = calcular_cuartil_agrupado(
-        3
-    )
+    frecuencia_anterior = 0
 
-    mediana = q2
-
-    # --------------------------------------------------------
-    # VARIANZA
-    # --------------------------------------------------------
-
-    suma_varianza = 0
-
-    for intervalo in intervalos:
-
-        suma_varianza += (
-            (
-                intervalo["xi"]
-                -
-                promedio
-            ) ** 2
-            *
-            intervalo["fi"]
+    if indice > 0:
+        frecuencia_anterior = (
+            intervalos[indice - 1]["frecuencia_acumulada"]
         )
 
-    varianza = (
-        suma_varianza
-        /
-        n
+    frecuencia_intervalo = intervalo["frecuencia"]
+
+    amplitud = intervalo["ls"] - intervalo["li"]
+
+    if frecuencia_intervalo == 0:
+        return intervalo["li"]
+
+    return (
+        intervalo["li"]
+        + amplitud
+        * (
+            (posicion - frecuencia_anterior)
+            / frecuencia_intervalo
+        )
     )
 
-    # --------------------------------------------------------
-    # DESVIO
-    # --------------------------------------------------------
 
-    desvio = math.sqrt(
-        varianza
+def calcular_varianza_agrupada(intervalos, media):
+
+    n = sum(i["frecuencia"] for i in intervalos)
+
+    if n < 2:
+        return None
+
+    suma = sum(
+        i["frecuencia"] * (i["xi"] - media) ** 2
+        for i in intervalos
     )
 
-    # --------------------------------------------------------
-    # ASIMETRIA
-    # --------------------------------------------------------
+    return suma / (n - 1)
+
+
+def calcular_medidas_agrupadas(intervalos):
+
+    if not intervalos:
+        return {}
+
+    n = sum(i["frecuencia"] for i in intervalos)
+
+    if n == 0:
+        return {}
+
+    media = calcular_media_agrupada(intervalos)
+
+    mediana = calcular_mediana_agrupada(intervalos)
+
+    moda = calcular_moda_agrupada(intervalos)
+
+    varianza = calcular_varianza_agrupada(
+        intervalos,
+        media
+    )
+
+    desvio = (
+        math.sqrt(varianza)
+        if varianza is not None
+        else None
+    )
+
+    q1 = calcular_cuartil_agrupado(intervalos, 1)
+    q2 = calcular_cuartil_agrupado(intervalos, 2)
+    q3 = calcular_cuartil_agrupado(intervalos, 3)
+
+    iqr = calcular_iqr(q1, q3)
+
+    cv = calcular_coeficiente_variacion(
+        media,
+        desvio
+    )
+
+    cv_porcentaje = calcular_coeficiente_variacion_porcentaje(
+        media,
+        desvio
+    )
 
     asimetria = calcular_asimetria(
-        promedio,
+        media,
         mediana,
         desvio
     )
 
-    # --------------------------------------------------------
-    # COEFICIENTE DE VARIACION
-    # --------------------------------------------------------
+    # Para datos agrupados no conocemos exactamente
+    # el mínimo y máximo originales.
+    minimo = intervalos[0]["li"]
+    maximo = intervalos[-1]["ls"]
 
-    cv = calcular_coeficiente_variacion(
-        promedio,
+    rango = maximo - minimo
+
+    li, ls = calcular_limites(
+        media,
         desvio
     )
 
-    cv_porcentaje = (
-        calcular_coeficiente_variacion_porcentaje(
-            promedio,
-            desvio
-        )
-    )
-
-    # --------------------------------------------------------
-    # RANGO DE LOS INTERVALOS
-    # --------------------------------------------------------
-
-    rango = (
-        intervalos[-1]["ls"]
-        -
-        intervalos[0]["li"]
-    )
-
     return {
+        "n": n,
 
-        "n":
-            n,
+        "minimo": minimo,
+        "maximo": maximo,
+        "rango": rango,
 
-        "minimo":
-            intervalos[0]["li"],
+        "media": media,
+        "mediana": mediana,
+        "moda": moda,
 
-        "maximo":
-            intervalos[-1]["ls"],
+        "varianza": varianza,
+        "desvio": desvio,
 
-        "rango":
-            rango,
+        "cv": cv,
+        "cv_porcentaje": cv_porcentaje,
 
-        "media":
-            promedio,
+        "asimetria": asimetria,
+        "clasificacion_asimetria": clasificar_asimetria(
+            asimetria
+        ),
 
-        "moda":
-            moda,
+        "Q1": q1,
+        "Q2": q2,
+        "Q3": q3,
+        "IQR": iqr,
 
-        "mediana":
-            mediana,
-
-        "varianza":
-            varianza,
-
-        "desvio":
-            desvio,
-
-        "coeficiente_variacion":
-            cv,
-
-        "coeficiente_variacion_porcentaje":
-            cv_porcentaje,
-
-        "asimetria":
-            asimetria,
-
-        "tipo_asimetria":
-            clasificar_asimetria(
-                asimetria
-            ),
-
-        "q1":
-            q1,
-
-        "q2":
-            q2,
-
-        "q3":
-            q3,
-
-        "li":
-            promedio - desvio,
-
-        "ls":
-            promedio + desvio
+        "LI": li,
+        "LS": ls
     }
+
+
+# ============================================================
+# EXPANDIR UNA MINI TABLA
+# ============================================================
+
+def expandir_frecuencias(frecuencias):
+
+    datos = []
+
+    for categoria, frecuencia in frecuencias:
+
+        frecuencia = int(frecuencia)
+
+        for _ in range(frecuencia):
+            datos.append(categoria)
+
+    return datos
