@@ -277,26 +277,32 @@ def ejecutar_tipo_4(ruta):
     datos_aproximados = []
 
     for intervalo in intervalos:
-
+    
         xi = intervalo["xi"]
         frecuencia = intervalo["frecuencia"]
-
+    
         for _ in range(frecuencia):
             datos_aproximados.append(xi)
-
-    resultados_boxplot = calculos.calcular_medidas(
-        datos_aproximados
-    )
-
+    
     interfaz.mostrar_boxplot(
         datos_aproximados,
-        resultados_boxplot
+        resultados
     )
-
+    
     # --------------------------------------------------------
     # Advertencia
     # --------------------------------------------------------
-
+    
+    interfaz.mostrar_mensaje(
+        "El boxplot es aproximado porque se construye "
+        "utilizando las marcas de clase (Xi)."
+    )
+    
+    interfaz.mostrar_mensaje(
+        "Los valores estadísticos mostrados corresponden "
+        "a los datos agrupados."
+    )
+    
     interfaz.mostrar_mensaje(
         "El boxplot exacto requiere los datos originales."
     )

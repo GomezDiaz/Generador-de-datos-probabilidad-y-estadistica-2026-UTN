@@ -450,18 +450,10 @@ def mostrar_boxplot(datos, resultados):
     if not datos:
         return
 
-    plt.figure(figsize=(9, 5))
-
-    bp = plt.boxplot(
-        datos,
-        vert=False
-    )
-
-    plt.title("Diagrama de cajas y bigotes")
-    plt.xlabel("Valores")
+    plt.figure(figsize=(10, 5))
 
     # --------------------------------------------------------
-    # Obtener valores estadísticos
+    # Obtener valores calculados
     # --------------------------------------------------------
 
     minimo = resultados.get("minimo")
@@ -480,90 +472,143 @@ def mostrar_boxplot(datos, resultados):
     )
 
     # --------------------------------------------------------
-    # Límites de detección de outliers
+    # Si es método 4
     # --------------------------------------------------------
 
-    if limite_inferior is not None:
-        plt.axvline(
-            limite_inferior,
-            linestyle="--",
-            label=f"LI outliers = {limite_inferior:.2f}"
-        )
+    if limite_inferior is None:
+        limite_inferior = q1 - 1.5 * (q3 - q1)
 
-    if limite_superior is not None:
-        plt.axvline(
-            limite_superior,
-            linestyle="--",
-            label=f"LS outliers = {limite_superior:.2f}"
-        )
+    if limite_superior is None:
+        limite_superior = q3 + 1.5 * (q3 - q1)
 
     # --------------------------------------------------------
-    # Mínimo
+    # Dibujar caja manualmente
     # --------------------------------------------------------
 
-    if minimo is not None:
-        plt.axvline(
-            minimo,
-            linestyle=":",
-            label=f"Mínimo = {minimo:.2f}"
-        )
+    caja_inferior = q1
+    caja_superior = q3
+
+    plt.barh(
+        1,
+        caja_superior - caja_inferior,
+        left=caja_inferior,
+        height=0.35,
+        fill=False
+    )
+
+    # --------------------------------------------------------
+    # Mediana
+    # --------------------------------------------------------
+
+    plt.axvline(
+        mediana,
+        linestyle="-",
+        label=f"Mediana (Q2) = {mediana:.2f}"
+    )
 
     # --------------------------------------------------------
     # Q1
     # --------------------------------------------------------
 
-    if q1 is not None:
-        plt.axvline(
-            q1,
-            linestyle=":",
-            label=f"Q1 = {q1:.2f}"
-        )
-
-    # --------------------------------------------------------
-    # Mediana / Q2
-    # --------------------------------------------------------
-
-    mediana = resultados.get("Q2")
-
-    if mediana is not None:
-
-        # La línea de la mediana pertenece al boxplot
-        bp["medians"][0].set_label(
-            f"Mediana (Q2) = {mediana:.2f}"
-        )
+    plt.axvline(
+        q1,
+        linestyle=":",
+        label=f"Q1 = {q1:.2f}"
+    )
 
     # --------------------------------------------------------
     # Q3
     # --------------------------------------------------------
 
-    if q3 is not None:
-        plt.axvline(
-            q3,
-            linestyle=":",
-            label=f"Q3 = {q3:.2f}"
-        )
-
-    # --------------------------------------------------------
-    # Máximo
-    # --------------------------------------------------------
-
-    if maximo is not None:
-        plt.axvline(
-            maximo,
-            linestyle=":",
-            label=f"Máximo = {maximo:.2f}"
-        )
+    plt.axvline(
+        q3,
+        linestyle=":",
+        label=f"Q3 = {q3:.2f}"
+    )
 
     # --------------------------------------------------------
     # Media
     # --------------------------------------------------------
 
-    if media is not None:
-        plt.axvline(
-            media,
-            linestyle="-",
-            label=f"Media = {media:.2f}"
-        )
+    plt.axvline(
+        media,
+        linestyle="-.",
+        label=f"Media = {media:.2f}"
+    )
+
+    # --------------------------------------------------------
+    # Bigote inferior
+    # --------------------------------------------------------
+
+    bigote_inferior = resultados.get(
+        "bigote_inferior",
+        minimo
+    )
+
+    plt.plot(
+        [bigote_inferior, q1],
+        [1, 1],
+        linestyle="-"
+    )
+
+    plt.plot(
+        [bigote_inferior, bigote_inferior],
+        [0.85, 1.15],
+        linestyle="-",
+        label=f"Mínimo = {bigote_inferior:.2f}"
+    )
+
+    # --------------------------------------------------------
+    # Bigote superior
+    # --------------------------------------------------------
+
+    bigote_superior = resultados.get(
+        "bigote_superior",
+        maximo
+    )
+
+    plt.plot(
+        [q3, bigote_superior],
+        [1, 1],
+        linestyle="-"
+    )
+
+    plt.plot(
+        [bigote_superior, bigote_superior],
+        [0.85, 1.15],
+        linestyle="-",
+        label=f"Máximo = {bigote_superior:.2f}"
+    )
+
+    # --------------------------------------------------------
+    # Límites para detectar outliers
+    # --------------------------------------------------------
+
+    plt.axvline(
+        limite_inferior,
+        linestyle="--",
+        label=f"LI outliers = {limite_inferior:.2f}"
+    )
+
+    plt.axvline(
+        limite_superior,
+        linestyle="--",
+        label=f"LS outliers = {limite_superior:.2f}"
+    )
+
+    # --------------------------------------------------------
+    # Configuración
+    # --------------------------------------------------------
+
+    plt.yticks([1], ["Datos"])
+
+    plt.title(
+        "Diagrama de cajas y bigotes"
+    )
+
+    plt.xlabel(
+        "Valores"
+    )
 
     plt.legend()
 
