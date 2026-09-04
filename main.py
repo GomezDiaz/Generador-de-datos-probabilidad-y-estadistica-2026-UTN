@@ -271,18 +271,43 @@ def ejecutar_tipo_4(ruta):
     )
 
     # --------------------------------------------------------
-    # Boxplot
+    # Boxplot aproximado
     # --------------------------------------------------------
 
-    interfaz.mostrar_mensaje(
-        "No se genera un boxplot exacto para este método "
-        "porque solamente se conocen los intervalos y sus "
-        "frecuencias, no los valores individuales."
+    datos_aproximados = []
+
+    for intervalo in intervalos:
+
+        xi = intervalo["xi"]
+        frecuencia = intervalo["frecuencia"]
+
+        for _ in range(frecuencia):
+            datos_aproximados.append(xi)
+
+    resultados_boxplot = calculos.calcular_medidas(
+        datos_aproximados
     )
+
+    interfaz.mostrar_boxplot(
+        datos_aproximados,
+        resultados_boxplot
+    )
+
+    # --------------------------------------------------------
+    # Advertencia
+    # --------------------------------------------------------
 
     interfaz.mostrar_mensaje(
         "El boxplot exacto requiere los datos originales."
     )
+
+# --------------------------------------------------------
+# Advertencia
+# --------------------------------------------------------
+
+interfaz.mostrar_mensaje(
+    "El boxplot exacto requiere los datos originales."
+)
 
 
 # ============================================================

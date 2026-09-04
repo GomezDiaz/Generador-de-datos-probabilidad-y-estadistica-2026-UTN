@@ -78,9 +78,23 @@ def seleccionar_tipo():
 
 def pedir_ruta_csv():
 
-    return input(
+    ruta = input(
         "\nIngrese la ruta del archivo CSV: "
     ).strip()
+
+    # Elimina comillas dobles externas
+    # Ejemplo:
+    # "C:\Users\Matias\Desktop\datos.csv"
+    if len(ruta) >= 2 and ruta[0] == '"' and ruta[-1] == '"':
+        ruta = ruta[1:-1]
+
+    # También permite comillas simples
+    # Ejemplo:
+    # 'C:\Users\Matias\Desktop\datos.csv'
+    elif len(ruta) >= 2 and ruta[0] == "'" and ruta[-1] == "'":
+        ruta = ruta[1:-1]
+
+    return ruta
 
 
 # ============================================================
@@ -436,9 +450,9 @@ def mostrar_boxplot(datos, resultados):
     if not datos:
         return
 
-    plt.figure(figsize=(7, 5))
+    plt.figure(figsize=(9, 5))
 
-    plt.boxplot(
+    bp = plt.boxplot(
         datos,
         vert=False
     )
@@ -446,7 +460,17 @@ def mostrar_boxplot(datos, resultados):
     plt.title("Diagrama de cajas y bigotes")
     plt.xlabel("Valores")
 
-    # Mostrar límites de detección de outliers
+    # --------------------------------------------------------
+    # Obtener valores estadísticos
+    # --------------------------------------------------------
+
+    minimo = resultados.get("minimo")
+    q1 = resultados.get("Q1")
+    mediana = resultados.get("Q2")
+    q3 = resultados.get("Q3")
+    maximo = resultados.get("maximo")
+    media = resultados.get("media")
+
     limite_inferior = resultados.get(
         "limite_box_inferior"
     )
@@ -455,22 +479,97 @@ def mostrar_boxplot(datos, resultados):
         "limite_box_superior"
     )
 
+    # --------------------------------------------------------
+    # Límites de detección de outliers
+    # --------------------------------------------------------
+
     if limite_inferior is not None:
         plt.axvline(
             limite_inferior,
-            linestyle="--"
+            linestyle="--",
+            label=f"LI outliers = {limite_inferior:.2f}"
         )
 
     if limite_superior is not None:
         plt.axvline(
             limite_superior,
-            linestyle="--"
+            linestyle="--",
+            label=f"LS outliers = {limite_superior:.2f}"
         )
+
+    # --------------------------------------------------------
+    # Mínimo
+    # --------------------------------------------------------
+
+    if minimo is not None:
+        plt.axvline(
+            minimo,
+            linestyle=":",
+            label=f"Mínimo = {minimo:.2f}"
+        )
+
+    # --------------------------------------------------------
+    # Q1
+    # --------------------------------------------------------
+
+    if q1 is not None:
+        plt.axvline(
+            q1,
+            linestyle=":",
+            label=f"Q1 = {q1:.2f}"
+        )
+
+    # --------------------------------------------------------
+    # Mediana / Q2
+    # --------------------------------------------------------
+
+    mediana = resultados.get("Q2")
+
+    if mediana is not None:
+
+        # La línea de la mediana pertenece al boxplot
+        bp["medians"][0].set_label(
+            f"Mediana (Q2) = {mediana:.2f}"
+        )
+
+    # --------------------------------------------------------
+    # Q3
+    # --------------------------------------------------------
+
+    if q3 is not None:
+        plt.axvline(
+            q3,
+            linestyle=":",
+            label=f"Q3 = {q3:.2f}"
+        )
+
+    # --------------------------------------------------------
+    # Máximo
+    # --------------------------------------------------------
+
+    if maximo is not None:
+        plt.axvline(
+            maximo,
+            linestyle=":",
+            label=f"Máximo = {maximo:.2f}"
+        )
+
+    # --------------------------------------------------------
+    # Media
+    # --------------------------------------------------------
+
+    if media is not None:
+        plt.axvline(
+            media,
+            linestyle="-",
+            label=f"Media = {media:.2f}"
+        )
+
+    plt.legend()
 
     plt.tight_layout()
 
     plt.show()
-
 
 # ============================================================
 # MENSAJES
