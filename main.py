@@ -199,10 +199,6 @@ def ejecutar_tipo_3(ruta):
         datos
     )
 
-    interfaz.mostrar_resultados(
-        resultados
-    )
-
     # --------------------------------------------------------
     # Construir intervalos
     # --------------------------------------------------------
@@ -211,8 +207,9 @@ def ejecutar_tipo_3(ruta):
         datos
     )
 
-    interfaz.mostrar_intervalos(
-        intervalos
+    interfaz.mostrar_resultados(
+        resultados,
+        intervalos=intervalos
     )
 
     # --------------------------------------------------------
@@ -245,10 +242,6 @@ def ejecutar_tipo_4(ruta):
         ruta
     )["intervalos"]
 
-    interfaz.mostrar_intervalos(
-        intervalos
-    )
-
     # --------------------------------------------------------
     # Medidas agrupadas
     # --------------------------------------------------------
@@ -259,7 +252,8 @@ def ejecutar_tipo_4(ruta):
 
     interfaz.mostrar_resultados(
         resultados,
-        agrupados=True
+        agrupados=True,
+        intervalos=intervalos
     )
 
     # --------------------------------------------------------

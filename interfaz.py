@@ -137,7 +137,7 @@ def mostrar_mini_tabla(tabla):
 # MOSTRAR INTERVALOS
 # ============================================================
 
-def mostrar_intervalos(intervalos):
+def mostrar_intervalos(intervalos, mostrar_tamano=False):
 
     print()
     print("-" * 80)
@@ -146,12 +146,20 @@ def mostrar_intervalos(intervalos):
 
     for intervalo in intervalos:
 
-        print(
+        texto_intervalo = (
             f"[{formato_numero(intervalo['li'])} ; "
             f"{formato_numero(intervalo['ls'])}) "
             f"fi={intervalo['frecuencia']} "
             f"Xi={formato_numero(intervalo['xi'])}"
         )
+
+        if mostrar_tamano:
+            tamano = intervalo['ls'] - intervalo['li']
+            texto_intervalo += (
+                f" Tamaño={formato_numero(tamano)}"
+            )
+
+        print(texto_intervalo)
 
 
 # ============================================================
@@ -160,13 +168,36 @@ def mostrar_intervalos(intervalos):
 
 def mostrar_resultados(
     resultados,
-    agrupados=False
+    agrupados=False,
+    intervalos=None
 ):
 
     print()
     print("=" * 60)
     print("RESULTADOS ESTADÍSTICOS")
     print("=" * 60)
+
+    # --------------------------------------------------------
+    # INTERVALOS
+    # --------------------------------------------------------
+
+    if intervalos:
+
+        print()
+        print("INTERVALOS")
+        print("-" * 60)
+
+        for intervalo in intervalos:
+
+            tamano = intervalo['ls'] - intervalo['li']
+
+            print(
+                f"[{formato_numero(intervalo['li'])} ; "
+                f"{formato_numero(intervalo['ls'])}) "
+                f"fi={intervalo['frecuencia']} "
+                f"Xi={formato_numero(intervalo['xi'])} "
+                f"Tamano={formato_numero(tamano)}"
+            )
 
     # --------------------------------------------------------
     # DATOS GENERALES
