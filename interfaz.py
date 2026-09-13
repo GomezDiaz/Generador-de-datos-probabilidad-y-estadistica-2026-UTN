@@ -42,6 +42,13 @@ def mostrar_menu():
     print()
     print("=" * 60)
     print("                 ESTADÍSTICA")
+    print("Grupo 11")
+    print("● Aldavez Martin Federico - 27850")
+    print("● Gomez Diaz Matias - 27957")
+    print("● Marquez Sebastian Marcos - 28469")
+    print("● Kibish David Nicolás - 29947")
+    print("● Zárate Axel Jerónimo - 28170")
+
     print("=" * 60)
 
     print("1. Categorías")
